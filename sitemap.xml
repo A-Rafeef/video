@@ -6,8 +6,28 @@
     <priority>1.0</priority>
   </url>
   <url>
-    <loc>https://removewatermark.dev/blog/</loc>
+    <loc>https://removewatermark.dev/about.html</loc>
     <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://removewatermark.dev/contact.html</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://removewatermark.dev/privacy-policy.html</loc>
+    <changefreq>yearly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://removewatermark.dev/terms.html</loc>
+    <changefreq>yearly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://removewatermark.dev/blog/</loc>
+    <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
@@ -22,6 +42,16 @@
   </url>
   <url>
     <loc>https://removewatermark.dev/blog/synthid-vs-visible-watermark/</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://removewatermark.dev/blog/best-free-ai-image-tools-2026/</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://removewatermark.dev/blog/gemini-nano-banana-pro/</loc>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>

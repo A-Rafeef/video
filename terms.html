@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en" class="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>Terms of Service – RemoveWatermark.dev</title>
+  <meta name="description" content="Terms of Service for RemoveWatermark.dev – a free, open-source, 100% client-side tool to remove visible AI sparkle watermarks from Google Gemini images." />
+  <meta name="robots" content="index, follow" />
+  <link rel="canonical" href="https://removewatermark.dev/terms.html" />
+  <meta name="theme-color" content="#6366f1" />
+
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://removewatermark.dev/terms.html" />
+  <meta property="og:title" content="Terms of Service – RemoveWatermark.dev" />
+  <meta property="og:description" content="Terms of Service for RemoveWatermark.dev. Read our usage terms, disclaimers, and intellectual property policy." />
+  <meta property="og:image" content="https://removewatermark.dev/assets/og-image.jpg" />
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
+  <script
+    defer
+    src="https://cloud.umami.is/script.js"
+    data-website-id="bf3b2209-f767-47d4-b127-69ce22c3cddf"
+  ></script>
+  <script>
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          fontFamily: { sans: ["Montserrat", "sans-serif"] },
+          colors: {
+            theme: { light: "#F7F9FB", dark: "#1D1F24", cardDark: "#262930" },
+            brand: { primary: "#6366f1", secondary: "#a855f7", accent: "#ec4899" },
+            patreon: "#FF424D",
+          },
+        },
+      },
+    };
+  </script>
+
+  <style>
+    body { font-family: "Montserrat", sans-serif; }
+    body, div, nav, header, footer { transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease; }
+    .hover-instagram:hover { color: #e1306c; transition: color 0.3s; }
+    .hover-patreon:hover { color: #FF424D; transition: color 0.3s; }
+  </style>
+</head>
+
+<body class="bg-theme-light dark:bg-theme-dark text-slate-800 dark:text-slate-200 antialiased flex flex-col min-h-screen selection:bg-brand-primary selection:text-white">
+
+  <!-- HEADER -->
+  <header class="sticky top-0 z-50 bg-white/80 dark:bg-theme-dark/90 backdrop-blur-md border-b border-gray-200 dark:border-gray-800">
+    <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
+      <div class="flex items-center gap-2 overflow-hidden hover:opacity-80 transition-opacity">
+        <span class="text-3xl select-none" aria-hidden="true">✨</span>
+        <a href="/" class="text-lg md:text-xl font-bold text-slate-900 dark:text-white whitespace-nowrap tracking-tight m-0">
+          AI Sparkle <span class="text-brand-primary">Remover</span>
+        </a>
+      </div>
+
+      <div class="flex items-center gap-4">
+        <button id="themeToggle" class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 text-slate-600 dark:text-slate-400 transition-all focus:outline-none focus:ring-2 focus:ring-brand-primary/50" aria-label="Toggle Dark Mode">
+          <iconify-icon id="sunIcon" icon="ph:sun-bold" width="22" class="hidden dark:block"></iconify-icon>
+          <iconify-icon id="moonIcon" icon="ph:moon-bold" width="22" class="block dark:hidden"></iconify-icon>
+        </button>
+        <nav aria-label="Site navigation" class="flex-shrink-0 border-l border-gray-200 dark:border-gray-700 pl-4 flex items-center gap-3">
+          <a href="https://github.com/dearabhin/gemini-watermark-remover" target="_blank" rel="noopener noreferrer" class="text-slate-600 dark:text-slate-400 hover:text-brand-primary dark:hover:text-white transition-colors flex items-center gap-1 font-semibold text-sm md:text-base" aria-label="View source on GitHub">
+            <iconify-icon icon="mdi:github" width="24"></iconify-icon>
+            <span class="hidden sm:inline">GitHub</span>
+          </a>
+          <a href="https://www.patreon.com/cw/AbhinKrishna/membership" target="_blank" rel="noopener noreferrer" class="text-slate-600 dark:text-slate-400 hover-patreon transition-colors flex items-center gap-1 font-semibold text-sm md:text-base" aria-label="Support on Patreon">
+            <iconify-icon icon="simple-icons:patreon" width="22"></iconify-icon>
+            <span class="hidden sm:inline">Patreon</span>
+          </a>
+        </nav>
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN CONTENT -->
+  <main class="flex-grow w-full max-w-4xl mx-auto px-4 py-8 space-y-6">
+
+    <!-- BREADCRUMB -->
+    <div>
+      <nav class="flex items-center gap-2 text-sm font-medium text-slate-500 dark:text-slate-400" aria-label="Breadcrumb">
+        <a href="/" class="hover:text-brand-primary dark:hover:text-white transition-colors">Home</a>
+        <iconify-icon icon="mdi:chevron-right" class="text-lg"></iconify-icon>
+        <span class="text-slate-700 dark:text-slate-300">Terms of Service</span>
+      </nav>
+    </div>
+
+    <!-- Page Header Card -->
+    <div class="bg-white dark:bg-theme-cardDark rounded-3xl p-8 shadow-sm border border-gray-100 dark:border-gray-800 transition-colors">
+      <div class="flex items-center gap-3 mb-4">
+        <iconify-icon icon="mdi:file-document-outline" class="text-3xl md:text-4xl text-brand-primary"></iconify-icon>
+        <h1 class="text-2xl md:text-3xl font-bold text-slate-900 dark:text-white tracking-tight">Terms of Service</h1>
+      </div>
+      <p class="text-slate-500 dark:text-slate-400 text-sm font-medium">Last updated: <strong class="text-slate-800 dark:text-slate-200">May 2026</strong> &nbsp;·&nbsp; Effective for <strong class="text-slate-800 dark:text-slate-200">removewatermark.dev</strong></p>
+      <div class="mt-6 bg-blue-50 dark:bg-blue-900/10 border border-blue-100 dark:border-blue-900/30 rounded-2xl px-5 py-4 flex gap-3 items-start shadow-sm">
+        <iconify-icon icon="mdi:information-outline" class="text-xl text-brand-primary mt-0.5 shrink-0"></iconify-icon>
+        <p class="text-slate-700 dark:text-slate-300 text-sm font-medium leading-relaxed"><strong class="text-slate-900 dark:text-white">Short version:</strong> This is a free, open-source tool. Use it responsibly. We provide it "as is" with no warranties. Your images stay on your device.</p>
+      </div>
+    </div>
+
+    <!-- Content Card -->
+    <div class="bg-white dark:bg-theme-cardDark rounded-3xl p-8 shadow-sm border border-gray-100 dark:border-gray-800 transition-colors space-y-8">
+
+      <div>
+        <h2 class="text-xl md:text-2xl font-bold text-slate-900 dark:text-white mb-4 flex items-center gap-2"><iconify-icon icon="mdi:handshake-outline" class="text-brand-primary text-2xl"></iconify-icon> 1. Acceptance of Terms</h2>
+        <p class="text-slate-600 dark:text-slate-400 font-medium leading-relaxed mb-2">By accessing or using RemoveWatermark.dev (the "Service"), you agree to be bound by these Terms of Service ("Terms"). If you do not agree with any part of these Terms, you must not use the Service.</p>
+        <p class="text-slate-600 dark:text-slate-400 font-medium leading-relaxed">These Terms apply to all visitors, users, and anyone who accesses or uses the Service. We may update these Terms from time to time. Continued use of the Service after changes constitutes your acceptance of the new Terms.</p>
+      </div>
+
+      <div>
+        <h2 class="text-xl md:text-2xl font-bold text-slate-900 dark:text-white mb-4 flex items-center gap-2"><iconify-icon icon="mdi:wrench-outline" class="text-brand-primary text-2xl"></iconify-icon> 2. Description of Service</h2>
+        <p class="text-slate-600 dark:text-slate-400 font-medium leading-relaxed mb-3">RemoveWatermark.dev is a free, open-source web tool that removes the visible sparkle (✨) watermark from images generated by Google Gemini AI. The tool works entirely within your web browser using a mathematical technique called Reverse Alpha Blending.</p>
+        <p class="text-slate-600 dark:text-slate-400 font-medium leading-relaxed mb-3">Key characteristics of the Service:</p>
+        <ul class="list-disc pl-6 space-y-2 text-slate-600 dark:text-slate-400 font-medium">
+          <li>All image processing is performed <strong class="text-slate-800 dark:text-slate-200">100% client-side</strong> in your browser.</li>
+          <li>No images are uploaded, stored, or transmitted to any server.</li>
+          <li>The Service is provided free of charge with no registration required.</li>
+          <li>The tool removes only the visible logo overlay; it does <strong class="text-slate-800 dark:text-slate-200">not</strong> remove the invisible SynthID watermark embedded by Google DeepMind.</li>
+        </ul>
+      </div>
+
+      <div>
+        <h2 class="text-xl md:text-2xl font-bold text-slate-900 dark:text-white mb-4 flex items-center gap-2"><iconify-icon icon="mdi:account-check-outline" class="text-brand-primary text-2xl"></iconify-icon> 3. User Responsibilities</h2>
+        <p class="text-slate-600 dark:text-slate-400 font-medium leading-relaxed mb-3">By using this Service, you agree to the following:</p>
+        <ul class="list-disc pl-6 space-y-2 text-slate-600 dark:text-slate-400 font-medium">
+          <li>You will use the Service only for <strong class="text-slate-800 dark:text-slate-200">lawful purposes</strong> and in compliance with all applicable local, national, and international laws and regulations.</li>
+          <li>You are solely responsible for ensuring that your use of processed images complies with applicable copyright laws, intellectual property rights, and the terms of service of the platform that generated them (e.g., Google Gemini).</li>
+          <li>You will not use the Service to misrepresent AI-generated content as human-created in contexts where such disclosure is legally or ethically required.</li>
+          <li>You will not attempt to disrupt, overload, or interfere with the proper functioning of the Service.</li>
+          <li>You will not use automated systems (bots, scrapers) to access the Service in a manner that could degrade performance for other users.</li>
+        </ul>
+      </div>
+
+      <div>
+        <h2 class="text-xl md:text-2xl font-bold text-slate-900 dark:text-white mb-4 flex items-center gap-2"><iconify-icon icon="mdi:scale-balance" class="text-brand-primary text-2xl"></iconify-icon> 4. Intellectual Property</h2>
+        <p class="text-slate-600 dark:text-slate-400 font-medium leading-relaxed mb-3">The source code of RemoveWatermark.dev is open source and available on <a href="https://github.com/dearabhin/gemini-watermark-remover" target="_blank" rel="noopener noreferrer" class="text-brand-primary hover:underline font-bold">GitHub</a> under its respective license.</p>
+        <p class="text-slate-600 dark:text-slate-400 font-medium leading-relaxed mb-3">The branding, design, logo, and original written content on this website (including blog articles) are the property of Abhin Krishna and are protected by applicable intellectual property laws.</p>
+        <p class="text-slate-600 dark:text-slate-400 font-medium leading-relaxed">The images you process through this tool remain your property. We claim no ownership or rights over any images uploaded to or processed by the Service.</p>
+      </div>
+
+      <div>
+        <h2 class="text-xl md:text-2xl font-bold text-slate-900 dark:text-white mb-4 flex items-center gap-2"><iconify-icon icon="mdi:alert-circle-outline" class="text-brand-primary text-2xl"></iconify-icon> 5. Disclaimer of Warranties</h2>
+        <p class="text-slate-600 dark:text-slate-400 font-medium leading-relaxed mb-3">The Service is provided on an <strong class="text-slate-800 dark:text-slate-200">"AS IS"</strong> and <strong class="text-slate-800 dark:text-slate-200">"AS AVAILABLE"</strong> basis without warranties of any kind, whether express or implied, including but not limited to:</p>
+        <ul class="list-disc pl-6 space-y-2 text-slate-600 dark:text-slate-400 font-medium mb-4">
+          <li>Implied warranties of merchantability, fitness for a particular purpose, or non-infringement.</li>
+          <li>That the Service will be uninterrupted, error-free, or free of viruses or other harmful components.</li>
+          <li>That the results obtained from the Service will be accurate or reliable.</li>
+          <li>That any defects in the Service will be corrected.</li>
+        </ul>
+        <p class="text-slate-600 dark:text-slate-400 font-medium leading-relaxed">The watermark removal process uses mathematical approximation. While designed to produce lossless results, we do not guarantee that the output will be identical to the original unwatermarked image under all conditions.</p>
+      </div>
+
+      <div>
+        <h2 class="text-xl md:text-2xl font-bold text-slate-900 dark:text-white mb-4 flex items-center gap-2"><iconify-icon icon="mdi:shield-off-outline" class="text-brand-primary text-2xl"></iconify-icon> 6. Limitation of Liability</h2>
+        <p class="text-slate-600 dark:text-slate-400 font-medium leading-relaxed mb-3">To the fullest extent permitted by applicable law, the developer (Abhin Krishna) and any contributors to this project shall not be liable for any indirect, incidental, special, consequential, or punitive damages, including but not limited to:</p>
+        <ul class="list-disc pl-6 space-y-2 text-slate-600 dark:text-slate-400 font-medium mb-4">
+          <li>Loss of profits, data, or goodwill.</li>
+          <li>Service interruption or computer damage.</li>
+          <li>Any damages arising from your use or inability to use the Service.</li>
+          <li>Any claims by third parties related to your use of processed images.</li>
+        </ul>
+        <p class="text-slate-600 dark:text-slate-400 font-medium leading-relaxed">This limitation applies regardless of the legal theory on which the claim is based, whether or not we have been advised of the possibility of such damages.</p>
+      </div>
+
+      <div>
+        <h2 class="text-xl md:text-2xl font-bold text-slate-900 dark:text-white mb-4 flex items-center gap-2"><iconify-icon icon="mdi:trademark" class="text-brand-primary text-2xl"></iconify-icon> 7. Third-Party Trademarks</h2>
+        <p class="text-slate-600 dark:text-slate-400 font-medium leading-relaxed mb-3">"Google", "Gemini", "Google Gemini", "SynthID", and "DeepMind" are trademarks of Google LLC and/or Alphabet Inc. This project is <strong class="text-slate-800 dark:text-slate-200">not affiliated with, endorsed by, or sponsored by Google</strong> in any way.</p>
+        <p class="text-slate-600 dark:text-slate-400 font-medium leading-relaxed">All other trademarks, service marks, and trade names referenced on this website are the property of their respective owners. Their use here is for identification purposes only and does not imply endorsement.</p>
+      </div>
+
+      <div>
+        <h2 class="text-xl md:text-2xl font-bold text-slate-900 dark:text-white mb-4 flex items-center gap-2"><iconify-icon icon="mdi:advertisements" class="text-brand-primary text-2xl"></iconify-icon> 8. Advertising</h2>
+        <p class="text-slate-600 dark:text-slate-400 font-medium leading-relaxed mb-3">This website may display advertisements from third-party ad networks to help sustain development and hosting costs. These advertisements are clearly distinguishable from the core tool functionality.</p>
+        <p class="text-slate-600 dark:text-slate-400 font-medium leading-relaxed">We are not responsible for the content, accuracy, or opinions expressed in third-party advertisements. Clicking on ads may redirect you to external websites whose terms and privacy policies are beyond our control.</p>
+      </div>
+
+      <div>
+        <h2 class="text-xl md:text-2xl font-bold text-slate-900 dark:text-white mb-4 flex items-center gap-2"><iconify-icon icon="mdi:link-variant" class="text-brand-primary text-2xl"></iconify-icon> 9. External Links</h2>
+        <p class="text-slate-600 dark:text-slate-400 font-medium leading-relaxed">This website may contain links to external websites or services (including GitHub, Patreon, and social media platforms) that are not operated or controlled by us. We are not responsible for the content, privacy policies, or practices of any third-party websites. We encourage you to review the terms and privacy policies of any external sites you visit.</p>
+      </div>
+
+      <div>
+        <h2 class="text-xl md:text-2xl font-bold text-slate-900 dark:text-white mb-4 flex items-center gap-2"><iconify-icon icon="mdi:gavel" class="text-brand-primary text-2xl"></iconify-icon> 10. Governing Law</h2>
+        <p class="text-slate-600 dark:text-slate-400 font-medium leading-relaxed">These Terms shall be governed by and construed in accordance with the laws of India, without regard to its conflict of law provisions. Any disputes arising under or in connection with these Terms shall be subject to the exclusive jurisdiction of the courts in Kerala, India.</p>
+      </div>
+
+      <div>
+        <h2 class="text-xl md:text-2xl font-bold text-slate-900 dark:text-white mb-4 flex items-center gap-2"><iconify-icon icon="mdi:cancel" class="text-brand-primary text-2xl"></iconify-icon> 11. Termination</h2>
+        <p class="text-slate-600 dark:text-slate-400 font-medium leading-relaxed">We reserve the right to restrict or terminate access to the Service at any time, without prior notice, for any reason, including but not limited to violations of these Terms. Upon termination, your right to use the Service will immediately cease.</p>
+      </div>
+
+      <div>
+        <h2 class="text-xl md:text-2xl font-bold text-slate-900 dark:text-white mb-4 flex items-center gap-2"><iconify-icon icon="mdi:file-document-edit-outline" class="text-brand-primary text-2xl"></iconify-icon> 12. Changes to These Terms</h2>
+        <p class="text-slate-600 dark:text-slate-400 font-medium leading-relaxed">We may revise these Terms at any time by updating this page. Changes are effective immediately upon posting. The "Last updated" date at the top of this page indicates when the Terms were last modified. Your continued use of the Service after any changes constitutes your acceptance of the updated Terms.</p>
+      </div>
+
+      <div>
+        <h2 class="text-xl md:text-2xl font-bold text-slate-900 dark:text-white mb-4 flex items-center gap-2"><iconify-icon icon="mdi:email-outline" class="text-brand-primary text-2xl"></iconify-icon> 13. Contact</h2>
+        <p class="text-slate-600 dark:text-slate-400 font-medium leading-relaxed mb-3">If you have any questions about these Terms, please reach out:</p>
+        <ul class="list-disc pl-6 space-y-2 text-slate-600 dark:text-slate-400 font-medium">
+          <li>Contact form: <a href="/contact.html" class="text-brand-primary hover:underline">removewatermark.dev/contact</a></li>
+          <li>GitHub: <a href="https://github.com/dearabhin" target="_blank" rel="noopener" class="text-brand-primary hover:underline">github.com/dearabhin</a></li>
+        </ul>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="bg-white dark:bg-theme-cardDark border-t border-gray-100 dark:border-gray-800 mt-auto transition-colors">
+    <div class="max-w-7xl mx-auto px-4 py-8 text-center">
+      <p class="text-sm text-slate-500 dark:text-slate-400 font-medium">
+        Developed by <span class="font-bold text-slate-900 dark:text-white">Abhin Krishna</span>
+      </p>
+      <nav aria-label="Social media links" class="flex justify-center gap-6 mt-4 text-slate-400 dark:text-slate-500">
+        <a href="https://twitter.com/dearabhin" target="_blank" rel="noopener noreferrer" class="hover:text-black dark:hover:text-white hover:scale-110 transition-transform" aria-label="Follow on Twitter / X"><iconify-icon icon="line-md:twitter-x" width="24"></iconify-icon></a>
+        <a href="https://instagram.com/dearabhin" target="_blank" rel="noopener noreferrer" class="hover-instagram hover:scale-110 transition-transform" aria-label="Follow on Instagram"><iconify-icon icon="mdi:instagram" width="24"></iconify-icon></a>
+        <a href="https://github.com/dearabhin" target="_blank" rel="noopener noreferrer" class="hover:text-black dark:hover:text-white hover:scale-110 transition-transform" aria-label="View GitHub profile"><iconify-icon icon="mdi:github" width="24"></iconify-icon></a>
+        <a href="https://linkedin.com/in/abhin-krishna" target="_blank" rel="noopener noreferrer" class="hover:text-[#0077b5] hover:scale-110 transition-transform" aria-label="Connect on LinkedIn"><iconify-icon icon="mdi:linkedin" width="24"></iconify-icon></a>
+        <a href="https://www.patreon.com/cw/AbhinKrishna/membership" target="_blank" rel="noopener noreferrer" class="hover-patreon hover:scale-110 transition-transform" aria-label="Support on Patreon"><iconify-icon icon="simple-icons:patreon" width="24"></iconify-icon></a>
+      </nav>
+      
+      <nav aria-label="Footer links" class="flex justify-center gap-4 mt-6 text-sm text-slate-500 dark:text-slate-400 font-medium flex-wrap">
+        <a href="/privacy-policy.html" class="hover:text-brand-primary dark:hover:text-white transition-colors">Privacy Policy</a>
+        <a href="/terms.html" class="hover:text-brand-primary dark:hover:text-white transition-colors">Terms of Service</a>
+        <a href="/about.html" class="hover:text-brand-primary dark:hover:text-white transition-colors">About</a>
+        <a href="/contact.html" class="hover:text-brand-primary dark:hover:text-white transition-colors">Contact</a>
+        <a href="/blog/" class="hover:text-brand-primary dark:hover:text-white transition-colors">Blog</a>
+      </nav>
+
+      <p class="text-xs text-slate-400 dark:text-slate-600 mt-6">
+        Disclaimer: This project is not affiliated with Google Gemini. <br />
+        &copy; 2026 AI Sparkle Remover. All rights reserved.
+      </p>
+    </div>
+  </footer>
+
+  <script>
+    // ── Theme toggle ──────────────────────────────
+    const themeToggleBtn = document.getElementById("themeToggle");
+    const htmlElement    = document.documentElement;
+
+    if (
+      localStorage.theme === "dark" ||
+      (!("theme" in localStorage) && window.matchMedia("(prefers-color-scheme: dark)").matches)
+    ) {
+      htmlElement.classList.add("dark");
+    } else {
+      htmlElement.classList.remove("dark");
+    }
+
+    themeToggleBtn.addEventListener("click", () => {
+      if (htmlElement.classList.contains("dark")) {
+        htmlElement.classList.remove("dark");
+        localStorage.theme = "light";
+      } else {
+        htmlElement.classList.add("dark");
+        localStorage.theme = "dark";
+      }
+    });
+  </script>
+</body>
+</html>
