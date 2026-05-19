@@ -1,0 +1,25 @@
+{
+  "name": "gemini-watermark-remover",
+  "version": "1.0.0",
+  "description": "[![Live Demo](https://img.shields.io/badge/demo-removewatermark.dev-success?style=flat-square&logo=cloudflare&logoColor=white)](https://removewatermark.dev) [![Stack](https://img.shields.io/badge/tech-HTML%20%7C%20JS%20%7C%20Tailwind-3B82F6?style=flat-square)](https://github.com/dearabhin/gemini-watermark-remover) [![License](https://img.shields.io/badge/license-MIT-orange?style=flat-square)](LICENSE)",
+  "main": "index.js",
+  "scripts": {
+    "build:css": "npx tailwindcss -i ./css/input.css -o ./css/output.css --minify",
+    "dev": "npx tailwindcss -i ./css/input.css -o ./css/output.css --watch",
+    "build": "npm run build:css"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dearabhin/gemini-watermark-remover.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/dearabhin/gemini-watermark-remover/issues"
+  },
+  "homepage": "https://github.com/dearabhin/gemini-watermark-remover#readme",
+  "devDependencies": {
+    "tailwindcss": "^3.4.19"
+  }
+}

@@ -1,6 +1,16 @@
-import { WatermarkEngine } from './engine.js';
+// Engine is lazy-loaded only when the user uploads an image
+let enginePromise = null;
 
-document.addEventListener('DOMContentLoaded', async () => {
+function getEngine() {
+    if (!enginePromise) {
+        enginePromise = import('./engine.js').then(({ WatermarkEngine }) =>
+            WatermarkEngine.create()
+        );
+    }
+    return enginePromise;
+}
+
+document.addEventListener('DOMContentLoaded', () => {
     // UI Elements
     const uploadArea = document.getElementById('uploadArea');
     const fileInput = document.getElementById('fileInput');
@@ -12,14 +22,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const downloadAllBtn = document.getElementById('downloadAllBtn');
     const resetBtn = document.getElementById('resetBtn');
 
-    let engine = null;
     let allProcessedFiles = []; 
-
-    try {
-        engine = await WatermarkEngine.create();
-    } catch (e) {
-        alert("Error: Assets not found.");
-    }
 
     uploadArea.addEventListener('click', () => fileInput.click());
 
@@ -63,8 +66,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     });
 
+    // JSZip is dynamically imported only when user triggers bulk download
     downloadAllBtn.addEventListener('click', async () => {
         if (allProcessedFiles.length === 0) return;
+        const { default: JSZip } = await import('https://cdn.jsdelivr.net/npm/jszip@3.10.1/+esm');
         const zip = new JSZip();
         allProcessedFiles.forEach(item => zip.file(item.name, item.blob));
         const zipBlob = await zip.generateAsync({ type: 'blob' });
@@ -134,6 +139,15 @@ document.addEventListener('DOMContentLoaded', async () => {
         previewSection.classList.remove('hidden');
         previewContainer.innerHTML = '';
         allProcessedFiles = [];
+
+        // Lazy-load engine on first use
+        let engine;
+        try {
+            engine = await getEngine();
+        } catch (e) {
+            alert("Error: Assets not found.");
+            return;
+        }
 
         for (let i = 0; i < validFiles.length; i++) {
             const file = validFiles[i];

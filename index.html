@@ -105,94 +105,25 @@
 <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
 <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
 
-<!-- ── Fonts ── -->
-<link rel="preconnect" href="https://fonts.googleapis.com" />
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link
-  href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap"
-  rel="stylesheet"
-/>
+<!-- ── Self-hosted Fonts ── -->
+<link rel="preload" href="/fonts/montserrat-latin.woff2" as="font" type="font/woff2" crossorigin />
 
-<script src="https://cdn.tailwindcss.com"></script>
-<script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
+<!-- ── Built Tailwind CSS (purged, minified) ── -->
+<link rel="stylesheet" href="/css/output.css" />
+
+<!-- ── Iconify (deferred to avoid render-blocking) ── -->
+<link rel="preconnect" href="https://api.iconify.design" />
+<link rel="preconnect" href="https://api.unisvg.com" />
+<script defer src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
+
+<!-- ── Analytics (already deferred) ── -->
 <script
   defer
   src="https://cloud.umami.is/script.js"
   data-website-id="bf3b2209-f767-47d4-b127-69ce22c3cddf"
 ></script>
 
-<script>
-  tailwind.config = {
-    darkMode: "class",
-    theme: {
-      extend: {
-        fontFamily: {
-          sans: ["Montserrat", "sans-serif"],
-        },
-        colors: {
-          theme: {
-            light: "#F7F9FB",
-            dark: "#1D1F24",
-            cardDark: "#262930",
-          },
-          brand: {
-            primary: "#6366f1",
-            secondary: "#a855f7",
-            accent: "#ec4899",
-          },
-          patreon: "#FF424D",
-        },
-        animation: {
-          "fade-in": "fadeIn 0.5s ease-out",
-          "slide-up": "slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1)",
-        },
-        keyframes: {
-          fadeIn: {
-            "0%": { opacity: "0", transform: "translateY(10px)" },
-            "100%": { opacity: "1", transform: "translateY(0)" },
-          },
-          slideUp: {
-            "0%": { opacity: "0", transform: "translateY(20px) scale(0.95)" },
-            "100%": { opacity: "1", transform: "translateY(0) scale(1)" },
-          },
-        },
-      },
-    },
-  };
-</script>
-
-<style>
-  body {
-    font-family: "Montserrat", sans-serif;
-  }
-  body,
-  div,
-  nav,
-  header,
-  footer {
-    transition: background-color 0.3s ease, color 0.3s ease,
-      border-color 0.3s ease;
-  }
-  .hover-instagram:hover {
-    color: #e1306c;
-    transition: color 0.3s;
-  }
-  .hover-patreon:hover {
-    color: #FF424D;
-    transition: color 0.3s;
-  }
-
-  /* ── Floating Support Popup ── */
-  #supportPopup {
-    transition: opacity 0.35s ease, transform 0.35s cubic-bezier(0.16,1,0.3,1);
-  }
-  #supportPopup.hidden-popup {
-    opacity: 0;
-    transform: translateY(16px) scale(0.97);
-    pointer-events: none;
-  }
-
-</style>
+<!-- All custom styles are now in css/input.css → css/output.css -->
 </head>
 
 <body
@@ -666,7 +597,7 @@
     })();
   </script>
 
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+  <!-- JSZip is now dynamically imported in app.js only when needed -->
   <script type="module" src="./js/app.js"></script>
 </body>
 </html>
