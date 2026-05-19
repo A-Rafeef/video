@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en" class="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>How to Generate Images with Gemini Nano Banana Pro - RemoveWatermark.dev</title>
+  <meta name="description" content="A complete guide to unlocking Gemini's Nano Banana Pro image model and the perfect prompt for testing textures." />
+  <meta name="robots" content="index, follow" />
+  <link rel="canonical" href="https://removewatermark.dev/blog/gemini-nano-banana-pro-guide/" />
+  <meta name="theme-color" content="#6366f1" />
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
+  <script>
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          fontFamily: { sans: ["Montserrat", "sans-serif"] },
+          colors: {
+            theme: { light: "#F7F9FB", dark: "#1D1F24", cardDark: "#262930" },
+            brand: { primary: "#6366f1", secondary: "#a855f7", accent: "#ec4899" },
+            patreon: "#FF424D",
+          },
+        },
+      },
+    };
+  </script>
+
+  <style>
+    body { font-family: "Montserrat", sans-serif; }
+    body, div, nav, header, footer { transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease; }
+    .hover-instagram:hover { color: #e1306c; transition: color 0.3s; }
+    .hover-patreon:hover { color: #FF424D; transition: color 0.3s; }
+    
+    /* Simple prose styling for the article */
+    article p { margin-bottom: 1.25em; }
+    article h2 { font-size: 1.5rem; font-weight: 700; margin-top: 2em; margin-bottom: 0.75em; color: inherit; }
+    article ul { list-style-type: disc; padding-left: 1.5em; margin-bottom: 1.25em; }
+    article li { margin-bottom: 0.5em; }
+    article strong { font-weight: 700; color: inherit; }
+    article a { color: #6366f1; text-decoration: none; font-weight: 600; transition: color 0.2s ease; }
+    article a:hover { color: #4f46e5; text-decoration: underline; }
+    .dark article a { color: #818cf8; }
+    .dark article a:hover { color: #a5b4fc; }
+  </style>
+</head>
+
+<body class="bg-theme-light dark:bg-theme-dark text-slate-800 dark:text-slate-200 antialiased flex flex-col min-h-screen selection:bg-brand-primary selection:text-white">
+
+  <!-- HEADER -->
+  <header class="sticky top-0 z-50 bg-white/80 dark:bg-theme-dark/90 backdrop-blur-md border-b border-gray-200 dark:border-gray-800">
+    <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
+      <div class="flex items-center gap-2 overflow-hidden hover:opacity-80 transition-opacity">
+        <span class="text-3xl select-none" aria-hidden="true">✨</span>
+        <a href="/" class="text-lg md:text-xl font-bold text-slate-900 dark:text-white whitespace-nowrap tracking-tight m-0">
+          AI Sparkle <span class="text-brand-primary">Remover</span>
+        </a>
+      </div>
+
+      <div class="flex items-center gap-4">
+        <button id="themeToggle" class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 text-slate-600 dark:text-slate-400 transition-all focus:outline-none focus:ring-2 focus:ring-brand-primary/50" aria-label="Toggle Dark Mode">
+          <iconify-icon id="sunIcon" icon="ph:sun-bold" width="22" class="hidden dark:block"></iconify-icon>
+          <iconify-icon id="moonIcon" icon="ph:moon-bold" width="22" class="block dark:hidden"></iconify-icon>
+        </button>
+        <nav aria-label="Site navigation" class="flex-shrink-0 border-l border-gray-200 dark:border-gray-700 pl-4 flex items-center gap-3">
+          <a href="https://github.com/dearabhin/gemini-watermark-remover" target="_blank" rel="noopener noreferrer" class="text-slate-600 dark:text-slate-400 hover:text-brand-primary dark:hover:text-white transition-colors flex items-center gap-1 font-semibold text-sm md:text-base">
+            <iconify-icon icon="mdi:github" width="24"></iconify-icon>
+            <span class="hidden sm:inline">GitHub</span>
+          </a>
+        </nav>
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN CONTENT -->
+  <main class="flex-grow w-full max-w-4xl mx-auto px-4 py-8 space-y-6">
+
+    <!-- BREADCRUMB -->
+    <div>
+      <nav class="flex items-center gap-2 text-sm font-medium text-slate-500 dark:text-slate-400" aria-label="Breadcrumb">
+        <a href="/" class="hover:text-brand-primary dark:hover:text-white transition-colors">Home</a>
+        <iconify-icon icon="mdi:chevron-right" class="text-lg"></iconify-icon>
+        <a href="/blog/" class="hover:text-brand-primary dark:hover:text-white transition-colors">Blog</a>
+        <iconify-icon icon="mdi:chevron-right" class="text-lg"></iconify-icon>
+        <span class="text-slate-700 dark:text-slate-300">Generating Images with Nano Banana Pro</span>
+      </nav>
+    </div>
+
+    <div class="bg-white dark:bg-theme-cardDark rounded-3xl p-8 shadow-sm border border-gray-100 dark:border-gray-800 transition-colors space-y-6">
+      
+      <div>
+        <h1 class="text-2xl md:text-4xl font-bold text-slate-900 dark:text-white tracking-tight mb-4">How to Generate Images with Gemini using Nano Banana Pro</h1>
+        <p class="text-slate-500 dark:text-slate-400 text-sm font-medium mb-8">Published: May 20, 2026</p>
+      </div>
+
+      <article class="text-slate-600 dark:text-slate-400 font-medium leading-relaxed">
+        <p>Hey everyone. If you have been following my deep dives into the forensics of AI images and building the AI Sparkle Remover, you know I generate a lot of test images. Recently, I have been pushing the boundaries of Google Gemini's native image generation capabilities, specifically exploring their latest image model architecture.</p>
+
+        <p>Today, I want to walk you through exactly how to access the absolute highest quality image generation inside Gemini using the Nano Banana Pro workflow, and share a specific prompt I use to stress test texture generation.</p>
+
+        <h2 class="text-slate-900 dark:text-white">Unlocking Nano Banana Pro</h2>
+        <p>First, let us clear up some naming confusion. The underlying engine powering image generation in the Gemini App is officially called Gemini 3 Flash Image. However, within the generative community, it is widely known by its codename: Nano Banana 2. This new model completely replaces the older Nano Banana architectures.</p>
+
+        <p>But here is the secret trick. If you are on a premium tier like AI Plus, Pro, or Ultra, you have access to a much more powerful variant called Nano Banana Pro. You cannot just select it from a dropdown menu right away. It requires a specific workflow to trigger the high fidelity upscale.</p>
+
+        <p>Here is how you do it:</p>
+        <ol class="list-decimal pl-5 space-y-2 mb-6">
+          <li>Type your prompt into the Gemini interface and hit generate. This uses the standard Nano Banana 2 model.</li>
+          <li>Once the image generates, hover over the image result.</li>
+          <li>Click the three dot menu icon in the corner of the image.</li>
+          <li>Select the <strong>"Redo with Pro"</strong> option.</li>
+        </ol>
+        
+        <p>This forces the system to reprocess your latent space request through the much heavier, compute intensive Nano Banana Pro model. The difference in fine detail, lighting accuracy, and prompt adherence is massive.</p>
+
+        <h2 class="text-slate-900 dark:text-white">The Ultimate Texture Prompt</h2>
+        <p>To really test how well Nano Banana Pro handles complex, contradictory textures, I like to mix organic materials with synthetic ones. My absolute favorite test is combining the rough, waxy texture of a crayon with the sharp, reflective nature of glitter.</p>
+
+        <p>If you want to try it yourself, copy and paste this exact prompt into Gemini. Just swap out the bracketed text with whatever character and colors you want to test:</p>
+
+        <div class="relative group my-6">
+          <div class="absolute -inset-0.5 bg-gradient-to-r from-brand-primary to-brand-secondary rounded-xl blur opacity-30 group-hover:opacity-60 transition duration-500"></div>
+          <div class="relative bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl p-5 pr-14 shadow-inner">
+            <button id="copyPromptBtn" class="absolute top-4 right-4 p-2 text-slate-400 hover:text-brand-primary bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 transition-all focus:outline-none focus:ring-2 focus:ring-brand-primary/50 active:scale-95 flex items-center justify-center" aria-label="Copy prompt" title="Copy to clipboard">
+              <iconify-icon id="copyIcon" icon="mdi:content-copy" width="18"></iconify-icon>
+            </button>
+            <code id="promptText" class="font-mono text-sm text-emerald-600 dark:text-emerald-400 block break-words">DRAWING a drawing of [Character], crayon on white paper, in the style of a children's book illustration, simple, cute, and full-color, with [two glitter accent colors] glitter accents and high detail.</code>
+          </div>
+        </div>
+
+        <h2 class="text-slate-900 dark:text-white">The Result</h2>
+        <p>When you run this through the "Redo with Pro" workflow, the results are incredible. The model perfectly captures the uneven, grainy strokes of a wax crayon pressing against thick paper, while selectively applying sharp, highly reflective glitter specks exactly where you requested them.</p>
+
+        <!-- IMAGE -->
+        <div class="my-10 w-full max-w-2xl mx-auto">
+          <figure>
+            <img src="/assets/ai-generated-image.jpg" alt="Gemini Generated Image of a nano banana with crayon and glitter texture" class="w-full rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 object-cover" />
+            <figcaption class="text-center text-sm text-slate-500 dark:text-slate-400 mt-3 font-medium">Nano Banana Pro rendering of the crayon and glitter prompt.</figcaption>
+          </figure>
+        </div>
+        <!-- END IMAGE -->
+
+        <p>Of course, as soon as you generate this beautiful image, you will notice that familiar little visible sparkle logo sitting right there in the bottom right corner. And as we all know by now, that visible layer is just an alpha compositing equation waiting to be reversed.</p>
+        
+        <p>Feel free to take your newly generated Nano Banana Pro image and run it straight through our AI Sparkle Remover tool. It handles the high resolution output flawlessly. Just remember, while the visible watermark mathematically vanishes, the invisible SynthID fingerprint is still woven deep into those beautiful glitter pixels!</p>
+
+      </article>
+
+      <div class="pt-8 border-t border-gray-100 dark:border-gray-800 mt-8">
+        <a href="/blog/best-free-ai-image-tools-2026/" class="inline-flex items-center gap-2 text-brand-primary hover:text-indigo-600 font-bold transition-colors">
+          <iconify-icon icon="mdi:arrow-left"></iconify-icon> Previous Article: Best Free AI Image Tools in 2026
+        </a>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="bg-white dark:bg-theme-cardDark border-t border-gray-100 dark:border-gray-800 mt-auto transition-colors">
+    <div class="max-w-7xl mx-auto px-4 py-8 text-center">
+      <nav aria-label="Footer links" class="flex justify-center gap-4 text-sm text-slate-500 dark:text-slate-400 font-medium flex-wrap">
+        <a href="/privacy-policy.html" class="hover:text-brand-primary dark:hover:text-white transition-colors">Privacy Policy</a>
+        <a href="/about.html" class="hover:text-brand-primary dark:hover:text-white transition-colors">About</a>
+        <a href="/contact.html" class="hover:text-brand-primary dark:hover:text-white transition-colors">Contact</a>
+        <a href="/blog/" class="hover:text-brand-primary dark:hover:text-white transition-colors">Blog</a>
+      </nav>
+      <p class="text-xs text-slate-400 dark:text-slate-600 mt-6">
+        Disclaimer: This project is not affiliated with Google Gemini. <br />
+        &copy; 2026 AI Sparkle Remover. All rights reserved.
+      </p>
+    </div>
+  </footer>
+
+  <script>
+    const themeToggleBtn = document.getElementById("themeToggle");
+    const htmlElement    = document.documentElement;
+    if (localStorage.theme === "dark" || (!("theme" in localStorage) && window.matchMedia("(prefers-color-scheme: dark)").matches)) {
+      htmlElement.classList.add("dark");
+    } else {
+      htmlElement.classList.remove("dark");
+    }
+    themeToggleBtn.addEventListener("click", () => {
+      if (htmlElement.classList.contains("dark")) {
+        htmlElement.classList.remove("dark"); localStorage.theme = "light";
+      } else {
+        htmlElement.classList.add("dark"); localStorage.theme = "dark";
+      }
+    });
+
+    // Copy prompt to clipboard functionality
+    const copyBtn = document.getElementById('copyPromptBtn');
+    const copyIcon = document.getElementById('copyIcon');
+    const promptText = document.getElementById('promptText');
+
+    if (copyBtn && promptText) {
+      copyBtn.addEventListener('click', async () => {
+        try {
+          await navigator.clipboard.writeText(promptText.textContent.trim());
+          
+          // Show success state
+          copyIcon.setAttribute('icon', 'mdi:check');
+          copyBtn.classList.add('text-emerald-500', 'border-emerald-500/50');
+          
+          setTimeout(() => {
+            copyIcon.setAttribute('icon', 'mdi:content-copy');
+            copyBtn.classList.remove('text-emerald-500', 'border-emerald-500/50');
+          }, 2000);
+        } catch (err) {
+          console.error('Failed to copy text: ', err);
+        }
+      });
+    }
+  </script>
+</body>
+</html>
