@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en" class="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>Blog & Articles – RemoveWatermark.dev</title>
+  <meta name="description" content="Read insights, technical explanations, and updates on AI watermark removal from RemoveWatermark.dev." />
+  <meta name="robots" content="index, follow" />
+  <link rel="canonical" href="https://removewatermark.dev/blog/" />
+  <meta name="theme-color" content="#6366f1" />
+
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://removewatermark.dev/blog/" />
+  <meta property="og:title" content="Blog & Articles – RemoveWatermark.dev" />
+  <meta property="og:description" content="Technical explanations and updates on AI watermark removal." />
+  <meta property="og:image" content="https://removewatermark.dev/assets/og-image.jpg" />
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
+  <script>
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          fontFamily: { sans: ["Montserrat", "sans-serif"] },
+          colors: {
+            theme: { light: "#F7F9FB", dark: "#1D1F24", cardDark: "#262930" },
+            brand: { primary: "#6366f1", secondary: "#a855f7", accent: "#ec4899" },
+            patreon: "#FF424D",
+          },
+        },
+      },
+    };
+  </script>
+
+  <style>
+    body { font-family: "Montserrat", sans-serif; }
+    body, div, nav, header, footer { transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease; }
+    .hover-instagram:hover { color: #e1306c; transition: color 0.3s; }
+    .hover-patreon:hover { color: #FF424D; transition: color 0.3s; }
+  </style>
+</head>
+
+<body class="bg-theme-light dark:bg-theme-dark text-slate-800 dark:text-slate-200 antialiased flex flex-col min-h-screen selection:bg-brand-primary selection:text-white">
+
+  <!-- HEADER -->
+  <header class="sticky top-0 z-50 bg-white/80 dark:bg-theme-dark/90 backdrop-blur-md border-b border-gray-200 dark:border-gray-800">
+    <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
+      <div class="flex items-center gap-2 overflow-hidden hover:opacity-80 transition-opacity">
+        <span class="text-3xl select-none" aria-hidden="true">✨</span>
+        <a href="/" class="text-lg md:text-xl font-bold text-slate-900 dark:text-white whitespace-nowrap tracking-tight m-0">
+          AI Sparkle <span class="text-brand-primary">Remover</span>
+        </a>
+      </div>
+
+      <div class="flex items-center gap-4">
+        <button id="themeToggle" class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 text-slate-600 dark:text-slate-400 transition-all focus:outline-none focus:ring-2 focus:ring-brand-primary/50" aria-label="Toggle Dark Mode">
+          <iconify-icon id="sunIcon" icon="ph:sun-bold" width="22" class="hidden dark:block"></iconify-icon>
+          <iconify-icon id="moonIcon" icon="ph:moon-bold" width="22" class="block dark:hidden"></iconify-icon>
+        </button>
+        <nav aria-label="Site navigation" class="flex-shrink-0 border-l border-gray-200 dark:border-gray-700 pl-4 flex items-center gap-3">
+          <a href="https://github.com/dearabhin/gemini-watermark-remover" target="_blank" rel="noopener noreferrer" class="text-slate-600 dark:text-slate-400 hover:text-brand-primary dark:hover:text-white transition-colors flex items-center gap-1 font-semibold text-sm md:text-base" aria-label="View source on GitHub">
+            <iconify-icon icon="mdi:github" width="24"></iconify-icon>
+            <span class="hidden sm:inline">GitHub</span>
+          </a>
+          <a href="https://www.patreon.com/cw/AbhinKrishna/membership" target="_blank" rel="noopener noreferrer" class="text-slate-600 dark:text-slate-400 hover-patreon transition-colors flex items-center gap-1 font-semibold text-sm md:text-base" aria-label="Support on Patreon">
+            <iconify-icon icon="simple-icons:patreon" width="22"></iconify-icon>
+            <span class="hidden sm:inline">Patreon</span>
+          </a>
+        </nav>
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN CONTENT -->
+  <main class="flex-grow w-full max-w-4xl mx-auto px-4 py-8 space-y-6">
+
+    <!-- BREADCRUMB -->
+    <div>
+      <nav class="flex items-center gap-2 text-sm font-medium text-slate-500 dark:text-slate-400" aria-label="Breadcrumb">
+        <a href="/" class="hover:text-brand-primary dark:hover:text-white transition-colors">Home</a>
+        <iconify-icon icon="mdi:chevron-right" class="text-lg"></iconify-icon>
+        <span class="text-slate-700 dark:text-slate-300">Blog</span>
+      </nav>
+    </div>
+
+    <!-- Page header -->
+    <div class="bg-white dark:bg-theme-cardDark rounded-3xl p-8 shadow-sm border border-gray-100 dark:border-gray-800 transition-colors">
+      <div class="flex items-center gap-3 mb-2">
+        <iconify-icon icon="mdi:post-outline" class="text-3xl md:text-4xl text-brand-primary"></iconify-icon>
+        <h1 class="text-2xl md:text-3xl font-bold text-slate-900 dark:text-white tracking-tight">Blog & Articles</h1>
+      </div>
+      <p class="text-slate-600 dark:text-slate-400 font-medium leading-relaxed mt-2">Insights, technical explanations, and updates on AI watermark removal.</p>
+    </div>
+
+    <!-- Article Grid -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+
+      <a href="/blog/gemini-watermark-explained/" class="group block bg-white dark:bg-theme-cardDark rounded-3xl p-6 shadow-sm border border-gray-100 dark:border-gray-800 hover:border-brand-primary/40 hover:shadow-md transition-all">
+        <div class="bg-indigo-50 dark:bg-indigo-900/20 text-brand-primary rounded-2xl w-12 h-12 flex items-center justify-center mb-5 group-hover:scale-110 transition-transform">
+          <iconify-icon icon="mdi:sparkles" class="text-2xl"></iconify-icon>
+        </div>
+        <h2 class="text-xl font-bold text-slate-900 dark:text-white mb-2 group-hover:text-brand-primary transition-colors">How the Gemini Watermark Works</h2>
+        <p class="text-slate-600 dark:text-slate-400 text-sm font-medium leading-relaxed mb-4">An in-depth look at Google's visible AI sparkle watermark and the alpha compositing technique used to apply it.</p>
+        <span class="text-brand-primary font-bold text-sm flex items-center gap-1">Read Article <iconify-icon icon="mdi:arrow-right"></iconify-icon></span>
+      </a>
+
+      <a href="/blog/reverse-alpha-blending/" class="group block bg-white dark:bg-theme-cardDark rounded-3xl p-6 shadow-sm border border-gray-100 dark:border-gray-800 hover:border-brand-primary/40 hover:shadow-md transition-all">
+        <div class="bg-indigo-50 dark:bg-indigo-900/20 text-brand-primary rounded-2xl w-12 h-12 flex items-center justify-center mb-5 group-hover:scale-110 transition-transform">
+          <iconify-icon icon="mdi:math-integral-box" class="text-2xl"></iconify-icon>
+        </div>
+        <h2 class="text-xl font-bold text-slate-900 dark:text-white mb-2 group-hover:text-brand-primary transition-colors">Reverse Alpha Blending Explained</h2>
+        <p class="text-slate-600 dark:text-slate-400 text-sm font-medium leading-relaxed mb-4">Understanding the mathematics behind lossless pixel recovery and how we can perfectly invert the alpha blending equation.</p>
+        <span class="text-brand-primary font-bold text-sm flex items-center gap-1">Read Article <iconify-icon icon="mdi:arrow-right"></iconify-icon></span>
+      </a>
+
+      <a href="/blog/synthid-vs-visible-watermark/" class="group block bg-white dark:bg-theme-cardDark rounded-3xl p-6 shadow-sm border border-gray-100 dark:border-gray-800 hover:border-brand-primary/40 hover:shadow-md transition-all">
+        <div class="bg-indigo-50 dark:bg-indigo-900/20 text-brand-primary rounded-2xl w-12 h-12 flex items-center justify-center mb-5 group-hover:scale-110 transition-transform">
+          <iconify-icon icon="mdi:google" class="text-2xl"></iconify-icon>
+        </div>
+        <h2 class="text-xl font-bold text-slate-900 dark:text-white mb-2 group-hover:text-brand-primary transition-colors">SynthID vs Visible Watermarks</h2>
+        <p class="text-slate-600 dark:text-slate-400 text-sm font-medium leading-relaxed mb-4">Understanding the difference between Gemini's visible sparkles and Google DeepMind's invisible SynthID technology.</p>
+        <span class="text-brand-primary font-bold text-sm flex items-center gap-1">Read Article <iconify-icon icon="mdi:arrow-right"></iconify-icon></span>
+      </a>
+
+    </div>
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="bg-white dark:bg-theme-cardDark border-t border-gray-100 dark:border-gray-800 mt-auto transition-colors">
+    <div class="max-w-7xl mx-auto px-4 py-8 text-center">
+      <nav aria-label="Footer links" class="flex justify-center gap-4 text-sm text-slate-500 dark:text-slate-400 font-medium flex-wrap">
+        <a href="/privacy-policy.html" class="hover:text-brand-primary dark:hover:text-white transition-colors">Privacy Policy</a>
+        <a href="/about.html" class="hover:text-brand-primary dark:hover:text-white transition-colors">About</a>
+        <a href="/contact.html" class="hover:text-brand-primary dark:hover:text-white transition-colors">Contact</a>
+        <a href="/blog/" class="hover:text-brand-primary dark:hover:text-white transition-colors">Blog</a>
+      </nav>
+      <p class="text-xs text-slate-400 dark:text-slate-600 mt-6">
+        Disclaimer: This project is not affiliated with Google Gemini. <br />
+        &copy; 2025 AI Sparkle Remover. All rights reserved.
+      </p>
+    </div>
+  </footer>
+
+  <script>
+    const themeToggleBtn = document.getElementById("themeToggle");
+    const htmlElement    = document.documentElement;
+    if (localStorage.theme === "dark" || (!("theme" in localStorage) && window.matchMedia("(prefers-color-scheme: dark)").matches)) {
+      htmlElement.classList.add("dark");
+    } else {
+      htmlElement.classList.remove("dark");
+    }
+    themeToggleBtn.addEventListener("click", () => {
+      if (htmlElement.classList.contains("dark")) {
+        htmlElement.classList.remove("dark"); localStorage.theme = "light";
+      } else {
+        htmlElement.classList.add("dark"); localStorage.theme = "dark";
+      }
+    });
+  </script>
+</body>
+</html>

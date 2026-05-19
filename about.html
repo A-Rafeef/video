@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en" class="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>About – RemoveWatermark.dev | Built by Abhin Krishna</title>
+  <meta name="description" content="About RemoveWatermark.dev – a free, open-source, 100% client-side tool to remove AI sparkle watermarks from Google Gemini images. Built by Abhin Krishna, BTech student from Kerala, India." />
+  <meta name="robots" content="index, follow" />
+  <link rel="canonical" href="https://removewatermark.dev/about.html" />
+  <meta name="theme-color" content="#6366f1" />
+
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://removewatermark.dev/about.html" />
+  <meta property="og:title" content="About – RemoveWatermark.dev" />
+  <meta property="og:description" content="Free, open-source Gemini AI watermark remover built by Abhin Krishna. 100% client-side, lossless, private." />
+  <meta property="og:image" content="https://removewatermark.dev/assets/og-image.jpg" />
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
+  <script>
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          fontFamily: { sans: ["Montserrat", "sans-serif"] },
+          colors: {
+            theme: { light: "#F7F9FB", dark: "#1D1F24", cardDark: "#262930" },
+            brand: { primary: "#6366f1", secondary: "#a855f7", accent: "#ec4899" },
+            patreon: "#FF424D",
+          },
+        },
+      },
+    };
+  </script>
+
+  <style>
+    body { font-family: "Montserrat", sans-serif; }
+    body, div, nav, header, footer { transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease; }
+    .hover-instagram:hover { color: #e1306c; transition: color 0.3s; }
+    .hover-patreon:hover { color: #FF424D; transition: color 0.3s; }
+  </style>
+</head>
+
+<body class="bg-theme-light dark:bg-theme-dark text-slate-800 dark:text-slate-200 antialiased flex flex-col min-h-screen selection:bg-brand-primary selection:text-white">
+
+  <!-- HEADER -->
+  <header class="sticky top-0 z-50 bg-white/80 dark:bg-theme-dark/90 backdrop-blur-md border-b border-gray-200 dark:border-gray-800">
+    <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
+      <div class="flex items-center gap-2 overflow-hidden hover:opacity-80 transition-opacity">
+        <span class="text-3xl select-none" aria-hidden="true">✨</span>
+        <a href="/" class="text-lg md:text-xl font-bold text-slate-900 dark:text-white whitespace-nowrap tracking-tight m-0">
+          AI Sparkle <span class="text-brand-primary">Remover</span>
+        </a>
+      </div>
+
+      <div class="flex items-center gap-4">
+        <button id="themeToggle" class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 text-slate-600 dark:text-slate-400 transition-all focus:outline-none focus:ring-2 focus:ring-brand-primary/50" aria-label="Toggle Dark Mode">
+          <iconify-icon id="sunIcon" icon="ph:sun-bold" width="22" class="hidden dark:block"></iconify-icon>
+          <iconify-icon id="moonIcon" icon="ph:moon-bold" width="22" class="block dark:hidden"></iconify-icon>
+        </button>
+        <nav aria-label="Site navigation" class="flex-shrink-0 border-l border-gray-200 dark:border-gray-700 pl-4 flex items-center gap-3">
+          <a href="https://github.com/dearabhin/gemini-watermark-remover" target="_blank" rel="noopener noreferrer" class="text-slate-600 dark:text-slate-400 hover:text-brand-primary dark:hover:text-white transition-colors flex items-center gap-1 font-semibold text-sm md:text-base" aria-label="View source on GitHub">
+            <iconify-icon icon="mdi:github" width="24"></iconify-icon>
+            <span class="hidden sm:inline">GitHub</span>
+          </a>
+          <a href="https://www.patreon.com/cw/AbhinKrishna/membership" target="_blank" rel="noopener noreferrer" class="text-slate-600 dark:text-slate-400 hover-patreon transition-colors flex items-center gap-1 font-semibold text-sm md:text-base" aria-label="Support on Patreon">
+            <iconify-icon icon="simple-icons:patreon" width="22"></iconify-icon>
+            <span class="hidden sm:inline">Patreon</span>
+          </a>
+        </nav>
+      </div>
+    </div>
+  </header>
+
+  <main class="flex-grow w-full max-w-4xl mx-auto px-4 py-8 space-y-8">
+
+    <!-- BREADCRUMB -->
+    <div>
+      <nav class="flex items-center gap-2 text-sm font-medium text-slate-500 dark:text-slate-400" aria-label="Breadcrumb">
+        <a href="/" class="hover:text-brand-primary dark:hover:text-white transition-colors">Home</a>
+        <iconify-icon icon="mdi:chevron-right" class="text-lg"></iconify-icon>
+        <span class="text-slate-700 dark:text-slate-300">About</span>
+      </nav>
+    </div>
+
+    <!-- Hero Card -->
+    <div class="bg-white dark:bg-theme-cardDark rounded-3xl p-8 shadow-sm border border-gray-100 dark:border-gray-800 transition-colors">
+      <div class="flex flex-col sm:flex-row gap-6 items-start">
+        <div class="shrink-0">
+          <div class="w-20 h-20 rounded-2xl bg-indigo-50 dark:bg-indigo-900/20 border border-brand-primary/20 flex items-center justify-center text-4xl shadow-sm">✨</div>
+        </div>
+        <div>
+          <h1 class="text-2xl md:text-3xl font-bold text-slate-900 dark:text-white mb-3 tracking-tight">About RemoveWatermark.dev</h1>
+          <p class="text-slate-600 dark:text-slate-400 font-medium leading-relaxed">A free, open-source, 100% client-side tool that removes the visible sparkle watermark from images generated by <strong class="text-slate-800 dark:text-slate-200">Google Gemini AI</strong> — instantly, privately, and without any quality loss.</p>
+          <div class="flex flex-wrap gap-2 mt-4">
+            <span class="bg-indigo-50 dark:bg-indigo-900/30 border border-indigo-200 dark:border-indigo-800 text-brand-primary dark:text-indigo-300 text-xs font-bold px-3 py-1 rounded-full">Open Source</span>
+            <span class="bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-800 text-green-600 dark:text-green-400 text-xs font-bold px-3 py-1 rounded-full">100% Client-Side</span>
+            <span class="bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800 text-blue-600 dark:text-blue-400 text-xs font-bold px-3 py-1 rounded-full">Lossless</span>
+            <span class="bg-purple-50 dark:bg-purple-900/30 border border-purple-200 dark:border-purple-800 text-purple-600 dark:text-purple-400 text-xs font-bold px-3 py-1 rounded-full">Free Forever</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- The Story -->
+    <div class="bg-white dark:bg-theme-cardDark rounded-3xl p-8 shadow-sm border border-gray-100 dark:border-gray-800 transition-colors">
+      <h2 class="text-xl md:text-2xl font-bold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
+        <iconify-icon icon="mdi:book-open-outline" class="text-brand-primary text-2xl"></iconify-icon>
+        The Story
+      </h2>
+      <p class="text-slate-600 dark:text-slate-400 font-medium leading-relaxed mb-4">When Google Gemini started adding a visible ✨ sparkle watermark to all its AI-generated images, it created friction for creators, students, researchers, and designers who needed clean images for presentations, mockups, and academic work.</p>
+      <p class="text-slate-600 dark:text-slate-400 font-medium leading-relaxed mb-4">Most "solutions" online were shady AI inpainting tools that guessed the pixels underneath — introducing artifacts and requiring image uploads to unknown servers. That didn't sit right.</p>
+      <p class="text-slate-600 dark:text-slate-400 font-medium leading-relaxed">Since Gemini uses a mathematically precise <strong class="text-slate-800 dark:text-slate-200">Alpha Compositing</strong> technique to embed the watermark, the original pixel values can be <strong class="text-slate-800 dark:text-slate-200">mathematically recovered</strong> with 100% accuracy — no guessing needed. This tool does exactly that, entirely inside your browser.</p>
+    </div>
+
+    <!-- How It Works -->
+    <div class="bg-white dark:bg-theme-cardDark rounded-3xl p-8 shadow-sm border border-gray-100 dark:border-gray-800 transition-colors">
+      <h2 class="text-xl md:text-2xl font-bold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
+        <iconify-icon icon="mdi:math-integral-box" class="text-brand-primary text-2xl"></iconify-icon>
+        How It Works — The Math
+      </h2>
+      <p class="text-slate-600 dark:text-slate-400 font-medium leading-relaxed mb-4">Google Gemini composites its watermark using standard alpha blending:</p>
+      <div class="bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl px-5 py-4 font-mono text-sm text-emerald-600 dark:text-emerald-400 mb-4 shadow-inner">
+        watermarked = alpha × logo_value + (1 − alpha) × original
+      </div>
+      <p class="text-slate-600 dark:text-slate-400 font-medium leading-relaxed mb-4">Since we know <code class="bg-gray-100 dark:bg-gray-800 px-1.5 py-0.5 rounded text-brand-primary dark:text-brand-secondary text-xs">alpha</code> and <code class="bg-gray-100 dark:bg-gray-800 px-1.5 py-0.5 rounded text-brand-primary dark:text-brand-secondary text-xs">logo_value</code> from reference images, we simply invert the equation:</p>
+      <div class="bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl px-5 py-4 font-mono text-sm text-emerald-600 dark:text-emerald-400 mb-4 shadow-inner">
+        original = (watermarked − alpha × logo_value) / (1 − alpha)
+      </div>
+      <p class="text-slate-600 dark:text-slate-400 font-medium leading-relaxed">This gives exact, lossless pixel restoration. No AI. No guessing. Pure math.</p>
+    </div>
+
+    <!-- Feature Grid (matching homepage style) -->
+    <div>
+      <h2 class="text-xl md:text-2xl font-bold text-slate-900 dark:text-white mb-5 flex items-center gap-2">
+        <iconify-icon icon="mdi:star-outline" class="text-brand-primary text-2xl"></iconify-icon>
+        Key Features
+      </h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 text-sm">
+        <div class="bg-white dark:bg-theme-cardDark rounded-2xl p-5 flex gap-3 items-start border border-gray-100 dark:border-gray-800 hover:border-brand-primary/40 transition-colors shadow-sm">
+          <iconify-icon icon="mdi:shield-lock-outline" class="text-2xl text-emerald-500 mt-0.5 shrink-0"></iconify-icon>
+          <div><p class="font-bold text-slate-900 dark:text-white">100% Private</p><p class="text-slate-500 dark:text-slate-400 mt-1 font-medium text-xs md:text-sm">Images never leave your browser. No server, no account, no sign-up.</p></div>
+        </div>
+        <div class="bg-white dark:bg-theme-cardDark rounded-2xl p-5 flex gap-3 items-start border border-gray-100 dark:border-gray-800 hover:border-brand-primary/40 transition-colors shadow-sm">
+          <iconify-icon icon="mdi:image-check-outline" class="text-2xl text-blue-500 mt-0.5 shrink-0"></iconify-icon>
+          <div><p class="font-bold text-slate-900 dark:text-white">Lossless Quality</p><p class="text-slate-500 dark:text-slate-400 mt-1 font-medium text-xs md:text-sm">Mathematical pixel restoration — zero compression, zero artifacts.</p></div>
+        </div>
+        <div class="bg-white dark:bg-theme-cardDark rounded-2xl p-5 flex gap-3 items-start border border-gray-100 dark:border-gray-800 hover:border-brand-primary/40 transition-colors shadow-sm">
+          <iconify-icon icon="mdi:flash-outline" class="text-2xl text-amber-500 mt-0.5 shrink-0"></iconify-icon>
+          <div><p class="font-bold text-slate-900 dark:text-white">Instant & Free</p><p class="text-slate-500 dark:text-slate-400 mt-1 font-medium text-xs md:text-sm">No waiting, no payment. Works on desktop and mobile.</p></div>
+        </div>
+        <div class="bg-white dark:bg-theme-cardDark rounded-2xl p-5 flex gap-3 items-start border border-gray-100 dark:border-gray-800 hover:border-brand-primary/40 transition-colors shadow-sm">
+          <iconify-icon icon="mdi:github" class="text-2xl text-slate-700 dark:text-slate-300 mt-0.5 shrink-0"></iconify-icon>
+          <div><p class="font-bold text-slate-900 dark:text-white">Open Source</p><p class="text-slate-500 dark:text-slate-400 mt-1 font-medium text-xs md:text-sm">Full source on <a href="https://github.com/dearabhin/gemini-watermark-remover" target="_blank" rel="noopener" class="text-brand-primary hover:underline">GitHub</a>. Inspect every line.</p></div>
+        </div>
+        <div class="bg-white dark:bg-theme-cardDark rounded-2xl p-5 flex gap-3 items-start border border-gray-100 dark:border-gray-800 hover:border-brand-primary/40 transition-colors shadow-sm">
+          <iconify-icon icon="mdi:layers-outline" class="text-2xl text-purple-500 mt-0.5 shrink-0"></iconify-icon>
+          <div><p class="font-bold text-slate-900 dark:text-white">Auto-Detection</p><p class="text-slate-500 dark:text-slate-400 mt-1 font-medium text-xs md:text-sm">Detects 48 px or 96 px watermark size based on image resolution.</p></div>
+        </div>
+        <div class="bg-white dark:bg-theme-cardDark rounded-2xl p-5 flex gap-3 items-start border border-gray-100 dark:border-gray-800 hover:border-brand-primary/40 transition-colors shadow-sm">
+          <iconify-icon icon="mdi:zip-box-outline" class="text-2xl text-pink-500 mt-0.5 shrink-0"></iconify-icon>
+          <div><p class="font-bold text-slate-900 dark:text-white">Bulk Processing</p><p class="text-slate-500 dark:text-slate-400 mt-1 font-medium text-xs md:text-sm">Upload multiple images and download them all as a ZIP.</p></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- About the Developer -->
+    <div class="bg-white dark:bg-theme-cardDark rounded-3xl p-8 shadow-sm border border-gray-100 dark:border-gray-800 transition-colors">
+      <h2 class="text-xl md:text-2xl font-bold text-slate-900 dark:text-white mb-5 flex items-center gap-2">
+        <iconify-icon icon="mdi:account-outline" class="text-brand-primary text-2xl"></iconify-icon>
+        About the Developer
+      </h2>
+      <div class="flex flex-col sm:flex-row gap-6 items-start">
+        <div class="shrink-0">
+          <div class="w-16 h-16 rounded-full bg-indigo-50 dark:bg-indigo-900/20 border-2 border-brand-primary/30 flex items-center justify-center text-2xl">👨‍💻</div>
+        </div>
+        <div class="space-y-3">
+          <div>
+            <p class="text-slate-900 dark:text-white font-bold text-lg">Abhin Krishna</p>
+            <p class="text-slate-500 dark:text-slate-400 text-sm font-medium leading-relaxed mt-1">BTech Electronics & Biomedical Engineering (with Honours) · Minor in AI<br/>Model Engineering College, Thrikkakara, Eranakulam, Kerala, India</p>
+          </div>
+          <p class="text-slate-600 dark:text-slate-400 font-medium leading-relaxed">Abhin is a second-year engineering student with a deep interest in AI, neurotechnology, Brain-Computer Interfaces, and open-source software. He builds tools that are private, fast, and free — because good software shouldn't cost or compromise your data.</p>
+          <p class="text-slate-600 dark:text-slate-400 font-medium leading-relaxed">RemoveWatermark.dev is one of several open-source projects he maintains alongside his academic research work in EEG, EMG, wearable tech, and machine learning.</p>
+          <div class="flex flex-wrap gap-3 pt-2">
+            <a href="https://github.com/dearabhin" target="_blank" rel="noopener noreferrer" class="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400 hover:text-brand-primary dark:hover:text-white transition-colors bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 font-semibold px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700">
+              <iconify-icon icon="mdi:github" width="18"></iconify-icon> GitHub
+            </a>
+            <a href="https://twitter.com/dearabhin" target="_blank" rel="noopener noreferrer" class="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400 hover:text-[#1DA1F2] dark:hover:text-white transition-colors bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 font-semibold px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700">
+              <iconify-icon icon="line-md:twitter-x" width="18"></iconify-icon> Twitter
+            </a>
+            <a href="https://linkedin.com/in/abhin-krishna" target="_blank" rel="noopener noreferrer" class="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400 hover:text-[#0077b5] dark:hover:text-white transition-colors bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 font-semibold px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700">
+              <iconify-icon icon="mdi:linkedin" width="18"></iconify-icon> LinkedIn
+            </a>
+            <a href="https://instagram.com/dearabhin" target="_blank" rel="noopener noreferrer" class="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400 hover:text-[#e1306c] dark:hover:text-white transition-colors bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 font-semibold px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700">
+              <iconify-icon icon="mdi:instagram" width="18"></iconify-icon> Instagram
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CTA -->
+    <div class="bg-white dark:bg-theme-cardDark rounded-3xl p-8 text-center shadow-sm border border-gray-100 dark:border-gray-800 transition-colors">
+      <span class="text-4xl mb-3 block" aria-hidden="true">☕</span>
+      <h2 class="text-xl md:text-2xl font-bold text-slate-900 dark:text-white mb-3">Support the Project</h2>
+      <p class="max-w-md mx-auto mb-6 text-slate-600 dark:text-slate-400 font-medium leading-relaxed">This tool is free and will always stay free. If it saved you time, consider supporting on Patreon — it helps with hosting costs and keeps development going.</p>
+      <a href="https://www.patreon.com/cw/AbhinKrishna/membership" target="_blank" rel="noopener noreferrer" class="inline-flex items-center justify-center gap-2 bg-brand-primary hover:bg-indigo-600 active:scale-95 text-white font-bold px-6 py-3.5 rounded-xl transition-all shadow-lg shadow-brand-primary/30 w-full sm:w-auto">
+        <iconify-icon icon="simple-icons:patreon" width="18"></iconify-icon> Support on Patreon
+      </a>
+    </div>
+
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="bg-white dark:bg-theme-cardDark border-t border-gray-100 dark:border-gray-800 mt-auto transition-colors">
+    <div class="max-w-7xl mx-auto px-4 py-8 text-center">
+      <p class="text-sm text-slate-500 dark:text-slate-400 font-medium">
+        Developed by <span class="font-bold text-slate-900 dark:text-white">Abhin Krishna</span>
+      </p>
+      <nav aria-label="Social media links" class="flex justify-center gap-6 mt-4 text-slate-400 dark:text-slate-500">
+        <a href="https://twitter.com/dearabhin" target="_blank" rel="noopener noreferrer" class="hover:text-black dark:hover:text-white hover:scale-110 transition-transform" aria-label="Follow on Twitter / X"><iconify-icon icon="line-md:twitter-x" width="24"></iconify-icon></a>
+        <a href="https://instagram.com/dearabhin" target="_blank" rel="noopener noreferrer" class="hover-instagram hover:scale-110 transition-transform" aria-label="Follow on Instagram"><iconify-icon icon="mdi:instagram" width="24"></iconify-icon></a>
+        <a href="https://github.com/dearabhin" target="_blank" rel="noopener noreferrer" class="hover:text-black dark:hover:text-white hover:scale-110 transition-transform" aria-label="View GitHub profile"><iconify-icon icon="mdi:github" width="24"></iconify-icon></a>
+        <a href="https://linkedin.com/in/abhin-krishna" target="_blank" rel="noopener noreferrer" class="hover:text-[#0077b5] hover:scale-110 transition-transform" aria-label="Connect on LinkedIn"><iconify-icon icon="mdi:linkedin" width="24"></iconify-icon></a>
+        <a href="https://www.patreon.com/cw/AbhinKrishna/membership" target="_blank" rel="noopener noreferrer" class="hover-patreon hover:scale-110 transition-transform" aria-label="Support on Patreon"><iconify-icon icon="simple-icons:patreon" width="24"></iconify-icon></a>
+      </nav>
+      
+      <nav aria-label="Footer links" class="flex justify-center gap-4 mt-6 text-sm text-slate-500 dark:text-slate-400 font-medium flex-wrap">
+        <a href="/privacy-policy.html" class="hover:text-brand-primary dark:hover:text-white transition-colors">Privacy Policy</a>
+        <a href="/about.html" class="hover:text-brand-primary dark:hover:text-white transition-colors">About</a>
+        <a href="/contact.html" class="hover:text-brand-primary dark:hover:text-white transition-colors">Contact</a>
+        <a href="/blog/" class="hover:text-brand-primary dark:hover:text-white transition-colors">Blog</a>
+      </nav>
+
+      <p class="text-xs text-slate-400 dark:text-slate-600 mt-6">
+        Disclaimer: This project is not affiliated with Google Gemini. <br />
+        &copy; 2025 AI Sparkle Remover. All rights reserved.
+      </p>
+    </div>
+  </footer>
+
+  <script>
+    // ── Theme toggle ──────────────────────────────
+    const themeToggleBtn = document.getElementById("themeToggle");
+    const htmlElement    = document.documentElement;
+
+    if (
+      localStorage.theme === "dark" ||
+      (!("theme" in localStorage) && window.matchMedia("(prefers-color-scheme: dark)").matches)
+    ) {
+      htmlElement.classList.add("dark");
+    } else {
+      htmlElement.classList.remove("dark");
+    }
+
+    themeToggleBtn.addEventListener("click", () => {
+      if (htmlElement.classList.contains("dark")) {
+        htmlElement.classList.remove("dark");
+        localStorage.theme = "light";
+      } else {
+        htmlElement.classList.add("dark");
+        localStorage.theme = "dark";
+      }
+    });
+  </script>
+</body>
+</html>

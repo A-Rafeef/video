@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en" class="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>Reverse Alpha Blending Explained - RemoveWatermark.dev</title>
+  <meta name="description" content="Understanding the mathematics behind lossless pixel recovery and how we can perfectly invert the alpha blending equation." />
+  <meta name="robots" content="index, follow" />
+  <link rel="canonical" href="https://removewatermark.dev/blog/reverse-alpha-blending/" />
+  <meta name="theme-color" content="#6366f1" />
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
+  <script>
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          fontFamily: { sans: ["Montserrat", "sans-serif"] },
+          colors: {
+            theme: { light: "#F7F9FB", dark: "#1D1F24", cardDark: "#262930" },
+            brand: { primary: "#6366f1", secondary: "#a855f7", accent: "#ec4899" },
+            patreon: "#FF424D",
+          },
+        },
+      },
+    };
+  </script>
+
+  <style>
+    body { font-family: "Montserrat", sans-serif; }
+    body, div, nav, header, footer { transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease; }
+    .hover-instagram:hover { color: #e1306c; transition: color 0.3s; }
+    .hover-patreon:hover { color: #FF424D; transition: color 0.3s; }
+    
+    /* Simple prose styling for the article */
+    article p { margin-bottom: 1.25em; }
+    article h2 { font-size: 1.5rem; font-weight: 700; margin-top: 2em; margin-bottom: 0.75em; color: inherit; }
+    article ul { list-style-type: disc; padding-left: 1.5em; margin-bottom: 1.25em; }
+    article li { margin-bottom: 0.5em; }
+    article strong { font-weight: 700; color: inherit; }
+  </style>
+</head>
+
+<body class="bg-theme-light dark:bg-theme-dark text-slate-800 dark:text-slate-200 antialiased flex flex-col min-h-screen selection:bg-brand-primary selection:text-white">
+
+  <!-- HEADER -->
+  <header class="sticky top-0 z-50 bg-white/80 dark:bg-theme-dark/90 backdrop-blur-md border-b border-gray-200 dark:border-gray-800">
+    <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
+      <div class="flex items-center gap-2 overflow-hidden hover:opacity-80 transition-opacity">
+        <span class="text-3xl select-none" aria-hidden="true">✨</span>
+        <a href="/" class="text-lg md:text-xl font-bold text-slate-900 dark:text-white whitespace-nowrap tracking-tight m-0">
+          AI Sparkle <span class="text-brand-primary">Remover</span>
+        </a>
+      </div>
+
+      <div class="flex items-center gap-4">
+        <button id="themeToggle" class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 text-slate-600 dark:text-slate-400 transition-all focus:outline-none focus:ring-2 focus:ring-brand-primary/50" aria-label="Toggle Dark Mode">
+          <iconify-icon id="sunIcon" icon="ph:sun-bold" width="22" class="hidden dark:block"></iconify-icon>
+          <iconify-icon id="moonIcon" icon="ph:moon-bold" width="22" class="block dark:hidden"></iconify-icon>
+        </button>
+        <nav aria-label="Site navigation" class="flex-shrink-0 border-l border-gray-200 dark:border-gray-700 pl-4 flex items-center gap-3">
+          <a href="https://github.com/dearabhin/gemini-watermark-remover" target="_blank" rel="noopener noreferrer" class="text-slate-600 dark:text-slate-400 hover:text-brand-primary dark:hover:text-white transition-colors flex items-center gap-1 font-semibold text-sm md:text-base">
+            <iconify-icon icon="mdi:github" width="24"></iconify-icon>
+            <span class="hidden sm:inline">GitHub</span>
+          </a>
+        </nav>
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN CONTENT -->
+  <main class="flex-grow w-full max-w-4xl mx-auto px-4 py-8 space-y-6">
+
+    <!-- BREADCRUMB -->
+    <div>
+      <nav class="flex items-center gap-2 text-sm font-medium text-slate-500 dark:text-slate-400" aria-label="Breadcrumb">
+        <a href="/" class="hover:text-brand-primary dark:hover:text-white transition-colors">Home</a>
+        <iconify-icon icon="mdi:chevron-right" class="text-lg"></iconify-icon>
+        <a href="/blog/" class="hover:text-brand-primary dark:hover:text-white transition-colors">Blog</a>
+        <iconify-icon icon="mdi:chevron-right" class="text-lg"></iconify-icon>
+        <span class="text-slate-700 dark:text-slate-300">Reverse Alpha Blending Explained</span>
+      </nav>
+    </div>
+
+    <div class="bg-white dark:bg-theme-cardDark rounded-3xl p-8 shadow-sm border border-gray-100 dark:border-gray-800 transition-colors space-y-6">
+      
+      <div>
+        <h1 class="text-2xl md:text-4xl font-bold text-slate-900 dark:text-white tracking-tight mb-4">Reverse Alpha Blending Explained</h1>
+        <p class="text-slate-500 dark:text-slate-400 text-sm font-medium mb-8">Published: May 19, 2026</p>
+      </div>
+
+      <article class="text-slate-600 dark:text-slate-400 font-medium leading-relaxed">
+        <p>If you have ever layered a semi-transparent image over another in Photoshop, you have already used Alpha Blending. This is exactly the technique Google Gemini uses to stamp its visible sparkle logo onto AI generated images. But here is the cool part: because this blending is just a fixed mathematical equation, we can run the math backwards to perfectly restore the original pixels hidden underneath.</p>
+        
+        <h2 class="text-slate-900 dark:text-white">The Compositing Equation</h2>
+        <p>When Gemini applies the watermark, it calculates the final color of every single pixel in that bottom right corner using a standard formula:</p>
+        <div class="bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl px-5 py-4 font-mono text-sm text-emerald-600 dark:text-emerald-400 shadow-inner overflow-x-auto whitespace-nowrap my-4">
+          watermarked_pixel = (alpha * logo_color) + (1 - alpha) * original_pixel
+        </div>
+        <p>In this equation, <code class="bg-gray-100 dark:bg-gray-800 px-1.5 py-0.5 rounded text-brand-primary dark:text-brand-secondary text-xs">alpha</code> represents the transparency of the watermark mask (ranging from 0 to 1), and <code class="bg-gray-100 dark:bg-gray-800 px-1.5 py-0.5 rounded text-brand-primary dark:text-brand-secondary text-xs">logo_color</code> is pure white, which has a pixel value of 255.</p>
+        
+        <h2 class="text-slate-900 dark:text-white">The Reversal</h2>
+        <p>Since we know the logo color is always pure white, and we can map out the exact alpha transparency levels from a reference watermark, we essentially have two out of the three variables needed. A quick bit of algebra allows us to rearrange the formula and solve directly for the <code class="bg-gray-100 dark:bg-gray-800 px-1.5 py-0.5 rounded text-brand-primary dark:text-brand-secondary text-xs">original_pixel</code>:</p>
+        <div class="bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl px-5 py-4 font-mono text-sm text-emerald-600 dark:text-emerald-400 shadow-inner overflow-x-auto whitespace-nowrap my-4">
+          original_pixel = (watermarked_pixel - alpha * 255) / (1 - alpha)
+        </div>
+        <p>By applying this reversed formula to every pixel inside the watermark bounding box, the logo mathematically dissolves. It leaves behind the exact, original generated pixel colors. There is no AI guessing, no messy blurring, and no generative inpainting. It is just pure, unadulterated mathematics doing the heavy lifting.</p>
+      </article>
+
+      <div class="pt-8 border-t border-gray-100 dark:border-gray-800 mt-8">
+        <a href="/blog/gemini-watermark-explained/" class="inline-flex items-center gap-2 text-brand-primary hover:text-indigo-600 font-bold transition-colors">
+          <iconify-icon icon="mdi:arrow-left"></iconify-icon> Previous Article: How the Gemini Watermark Works
+        </a>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="bg-white dark:bg-theme-cardDark border-t border-gray-100 dark:border-gray-800 mt-auto transition-colors">
+    <div class="max-w-7xl mx-auto px-4 py-8 text-center">
+      <nav aria-label="Footer links" class="flex justify-center gap-4 text-sm text-slate-500 dark:text-slate-400 font-medium flex-wrap">
+        <a href="/privacy-policy.html" class="hover:text-brand-primary dark:hover:text-white transition-colors">Privacy Policy</a>
+        <a href="/about.html" class="hover:text-brand-primary dark:hover:text-white transition-colors">About</a>
+        <a href="/contact.html" class="hover:text-brand-primary dark:hover:text-white transition-colors">Contact</a>
+        <a href="/blog/" class="hover:text-brand-primary dark:hover:text-white transition-colors">Blog</a>
+      </nav>
+      <p class="text-xs text-slate-400 dark:text-slate-600 mt-6">
+        Disclaimer: This project is not affiliated with Google Gemini. <br />
+        &copy; 2026 AI Sparkle Remover. All rights reserved.
+      </p>
+    </div>
+  </footer>
+
+  <script>
+    const themeToggleBtn = document.getElementById("themeToggle");
+    const htmlElement    = document.documentElement;
+    if (localStorage.theme === "dark" || (!("theme" in localStorage) && window.matchMedia("(prefers-color-scheme: dark)").matches)) {
+      htmlElement.classList.add("dark");
+    } else {
+      htmlElement.classList.remove("dark");
+    }
+    themeToggleBtn.addEventListener("click", () => {
+      if (htmlElement.classList.contains("dark")) {
+        htmlElement.classList.remove("dark"); localStorage.theme = "light";
+      } else {
+        htmlElement.classList.add("dark"); localStorage.theme = "dark";
+      }
+    });
+  </script>
+</body>
+</html>
