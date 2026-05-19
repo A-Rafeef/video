@@ -117,13 +117,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 <div class="p-3 ${bgPattern} flex justify-center h-64"><img src="${fileData.originalSrc}" class="max-h-full object-contain rounded shadow-sm mx-auto" /></div>
             </div>
             <div class="bg-white dark:bg-theme-cardDark rounded-xl shadow-md overflow-hidden border border-green-500/40 ring-2 ring-green-500/20">
-                <div class="bg-green-50 dark:bg-green-900/20 px-3 py-2 border-b border-green-500/30 flex justify-between items-center">
-                    <div class="flex items-center gap-1 font-bold text-green-600 dark:text-green-400 text-xs"><iconify-icon icon="ph:check-circle-fill" width="16"></iconify-icon>Completed</div>
-                    <button class="flex items-center gap-1 px-3 py-1.5 text-[11px] sm:text-xs font-bold text-white bg-green-600 hover:bg-green-700 rounded-lg transition-all active:scale-95" data-index="${index}">
-                        <iconify-icon icon="ph:download-simple-bold" width="14"></iconify-icon> Download
-                    </button>
+                <div class="bg-green-50 dark:bg-green-900/20 px-3 py-2 border-b border-green-500/30 flex items-center gap-1">
+                    <iconify-icon icon="ph:check-circle-fill" width="16" class="text-green-600 dark:text-green-400"></iconify-icon>
+                    <span class="font-bold text-green-600 dark:text-green-400 text-xs">Cleaned</span>
                 </div>
                 <div class="p-3 ${bgPattern} flex justify-center h-64"><img src="${fileData.url}" class="max-h-full object-contain rounded shadow-sm mx-auto" /></div>
+                <div class="p-3 border-t border-green-500/20">
+                    <button class="w-full flex items-center justify-center gap-2 px-4 py-2.5 text-xs sm:text-sm font-bold text-white bg-green-600 hover:bg-green-700 rounded-xl transition-all active:scale-95" data-index="${index}">
+                        <iconify-icon icon="ph:download-simple-bold" width="16"></iconify-icon> Download
+                    </button>
+                </div>
             </div>`;
 
         card.querySelector('button[data-index]').addEventListener('click', () => {
