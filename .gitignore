@@ -1,8 +1,12 @@
 # Dependencies
 node_modules/
 
-# Generated CSS (built by Cloudflare Pages during deploy)
-css/output.css
+# Vite build output
+dist/
 
-# blog/best-free-ai-image-tools-2026
-# blog/gemini-nano-banana-pro
+# Generated CSS for static SEO pages (built during deploy)
+public/css/output.css
+
+# Logs / misc
+*.log
+.DS_Store

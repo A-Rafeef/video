@@ -18,8 +18,8 @@ export class WatermarkEngine {
 
         try {
             const [bg48, bg96] = await Promise.all([
-                loadImage('./assets/bg_48.png'),
-                loadImage('./assets/bg_96.png')
+                loadImage('/assets/bg_48.png'),
+                loadImage('/assets/bg_96.png')
             ]);
             return new WatermarkEngine(bg48, bg96);
         } catch (e) {
@@ -85,5 +85,28 @@ export class WatermarkEngine {
             width: img.width,
             height: img.height
         };
+    }
+
+    // Pre-load the alpha map needed for a given frame size so per-frame
+    // processing (e.g. video) stays fully synchronous and fast.
+    async prepareForSize(width, height) {
+        const config = this.getWatermarkInfo(width, height);
+        const alphaMap = await this.getAlphaMap(config.size);
+        return { config, alphaMap };
+    }
+
+    // Remove the watermark from an already-decoded frame (ImageData), in place.
+    // Reuses the exact same Reverse Alpha Blending logic as the image remover.
+    removeFromImageData(imageData, prepared) {
+        const { config, alphaMap } =
+            prepared || this._sync(imageData.width, imageData.height);
+        removeWatermark(imageData, alphaMap, config);
+        return imageData;
+    }
+
+    // Synchronous lookup used only after prepareForSize() has cached the map.
+    _sync(width, height) {
+        const config = this.getWatermarkInfo(width, height);
+        return { config, alphaMap: this.alphaMaps[config.size] };
     }
 }

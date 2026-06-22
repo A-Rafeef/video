@@ -1,25 +1,41 @@
 {
   "name": "gemini-watermark-remover",
-  "version": "1.0.0",
-  "description": "[![Live Demo](https://img.shields.io/badge/demo-removewatermark.dev-success?style=flat-square&logo=cloudflare&logoColor=white)](https://removewatermark.dev) [![Stack](https://img.shields.io/badge/tech-HTML%20%7C%20JS%20%7C%20Tailwind-3B82F6?style=flat-square)](https://github.com/dearabhin/gemini-watermark-remover) [![License](https://img.shields.io/badge/license-MIT-orange?style=flat-square)](LICENSE)",
-  "main": "index.js",
+  "version": "2.0.0",
+  "description": "Free, private, in-browser tool to remove the visible Gemini AI sparkle watermark from images and videos.",
+  "type": "module",
   "scripts": {
-    "build:css": "npx tailwindcss -i ./css/input.css -o ./css/output.css --minify",
-    "dev": "npx tailwindcss -i ./css/input.css -o ./css/output.css --watch",
-    "build": "npm run build:css"
+    "dev": "vite",
+    "build:css": "tailwindcss -i ./src/style.css -o ./public/css/output.css --minify",
+    "watch:css": "tailwindcss -i ./src/style.css -o ./public/css/output.css --watch",
+    "build": "npm run build:css && vite build",
+    "preview": "vite preview"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/dearabhin/gemini-watermark-remover.git"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "keywords": [
+    "gemini",
+    "watermark",
+    "remover",
+    "vue",
+    "vite",
+    "tailwind"
+  ],
+  "author": "Abhin Krishna",
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/dearabhin/gemini-watermark-remover/issues"
   },
   "homepage": "https://github.com/dearabhin/gemini-watermark-remover#readme",
+  "dependencies": {
+    "vue": "^3.5.13"
+  },
   "devDependencies": {
-    "tailwindcss": "^3.4.19"
+    "@vitejs/plugin-vue": "^5.2.1",
+    "autoprefixer": "^10.4.20",
+    "postcss": "^8.4.49",
+    "tailwindcss": "^3.4.19",
+    "vite": "^6.0.7"
   }
 }
