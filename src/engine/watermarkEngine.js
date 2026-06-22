@@ -1,5 +1,6 @@
 import { calculateAlphaMap } from './alphaMap.js';
 import { removeWatermark } from './blendModes.js';
+import { getWatermarkInfo } from './geometry.js';
 
 export class WatermarkEngine {
     constructor(bg48, bg96) {
@@ -29,17 +30,7 @@ export class WatermarkEngine {
     }
 
     getWatermarkInfo(width, height) {
-        const isLarge = width > 1024 && height > 1024;
-        const size = isLarge ? 96 : 48;
-        const margin = isLarge ? 64 : 32;
-        
-        return {
-            size,
-            x: width - margin - size,
-            y: height - margin - size,
-            width: size, 
-            height: size
-        };
+        return getWatermarkInfo(width, height);
     }
 
     async getAlphaMap(size) {
