@@ -115,6 +115,8 @@ export class VideoWatermarkEngine {
         const videoSource = new CanvasSource(canvas, {
             codec: 'avc',
             bitrate: QUALITY_HIGH,
+            keyFrameInterval: 2,
+            sizeChangeBehavior: 'passThrough',
         });
         output.addVideoTrack(videoSource, { frameRate });
 
@@ -140,8 +142,9 @@ export class VideoWatermarkEngine {
         await output.start();
 
         // --- Process every video frame ---
-        // FIX 1: WebCodecs requires timestamps and durations to be in microseconds (1e6 per second).
-        const fallbackDur = frameRate > 0 ? Math.round(1e6 / frameRate) : Math.round(1e6 / 30);
+        // mediabunny's high-level API uses SECONDS for all timestamps/durations
+        // (not raw WebCodecs microseconds).
+        const fallbackDur = frameRate > 0 ? 1 / frameRate : 1 / 30;
         const sink = new VideoSampleSink(videoTrack);
         let firstTimestamp = null;
         let lastTimestamp = -1;
@@ -182,8 +185,8 @@ export class VideoWatermarkEngine {
                     let newTs = packet.timestamp - offset;
                     if (newTs < 0) continue;
                     
-                    // Ensure strictly increasing audio timestamps
-                    if (newTs <= lastAudioTs) newTs = lastAudioTs + 1;
+                    // Ensure strictly increasing audio timestamps (seconds).
+                    if (newTs <= lastAudioTs) newTs = lastAudioTs + 1e-6;
                     lastAudioTs = newTs;
 
                     let outPacket = packet;
