@@ -150,7 +150,7 @@ function reset() {
         <div class="h-full bg-gradient-to-r from-brand-primary via-brand-secondary to-brand-accent transition-all duration-200" :style="{ width: `${Math.round(progress * 100)}%` }"></div>
       </div>
       <p class="text-xs text-slate-400 dark:text-slate-500 mt-2 font-medium">
-        {{ Math.round(progress * 100) }}% — processing runs in real time, please keep this tab open.
+        {{ Math.round(progress * 100) }}% — decoded &amp; re-encoded locally with audio, please keep this tab open.
       </p>
     </div>
 

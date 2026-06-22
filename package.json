@@ -29,6 +29,7 @@
   },
   "homepage": "https://github.com/dearabhin/gemini-watermark-remover#readme",
   "dependencies": {
+    "mediabunny": "^1.49.0",
     "vue": "^3.5.13"
   },
   "devDependencies": {

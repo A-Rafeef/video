@@ -139,4 +139,4 @@ This tool is for **educational and personal use only**.
 
 * Developed by **Abhin Krishna**.
 * Image algorithm adapted from [GeminiWatermarkTool](https://github.com/allenk/GeminiWatermarkTool).
-* Video watermark-removal feature inspired by [GargantuaX/gemini-watermark-remover](https://github.com/GargantuaX/gemini-watermark-remover).
+* Video watermark-removal pipeline follows [GargantuaX/gemini-watermark-remover](https://github.com/GargantuaX/gemini-watermark-remover) (MIT) — a WebCodecs decode → per-frame removal → MP4 re-encode flow with audio passthrough, powered by the [mediabunny](https://github.com/Vanilagy/mediabunny) library.

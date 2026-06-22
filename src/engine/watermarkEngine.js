@@ -44,12 +44,31 @@ export class WatermarkEngine {
 
     async getAlphaMap(size) {
         if (this.alphaMaps[size]) return this.alphaMaps[size];
-        
+
         const canvas = document.createElement('canvas');
         canvas.width = size; canvas.height = size;
         const ctx = canvas.getContext('2d');
         ctx.drawImage(size === 48 ? this.bg48 : this.bg96, 0, 0);
-        
+
+        const map = calculateAlphaMap(ctx.getImageData(0, 0, size, size));
+        this.alphaMaps[size] = map;
+        return map;
+    }
+
+    // Build a watermark alpha map at an arbitrary size by scaling the 96px
+    // sparkle reference. Used for video frames, whose watermark size varies
+    // with resolution. Cached per size.
+    buildScaledAlphaMap(size) {
+        if (this.alphaMaps[size]) return this.alphaMaps[size];
+
+        const canvas = document.createElement('canvas');
+        canvas.width = size; canvas.height = size;
+        const ctx = canvas.getContext('2d', { willReadFrequently: true });
+        ctx.clearRect(0, 0, size, size);
+        ctx.imageSmoothingEnabled = true;
+        ctx.imageSmoothingQuality = 'high';
+        ctx.drawImage(this.bg96, 0, 0, size, size);
+
         const map = calculateAlphaMap(ctx.getImageData(0, 0, size, size));
         this.alphaMaps[size] = map;
         return map;

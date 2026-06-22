@@ -2,21 +2,18 @@ import { WatermarkEngine } from './watermarkEngine.js';
 import { removeWatermark } from './blendModes.js';
 
 /**
- * Client-side video watermark remover.
+ * Client-side Gemini Veo video watermark remover.
  *
- * It reuses the *exact* same Reverse Alpha Blending logic as the image remover
- * (via WatermarkEngine), applied frame-by-frame:
- *   1. The video is played back (silently) into a hidden <video> element.
- *   2. Each presented frame is drawn to a canvas; the watermark region in the
- *      bottom-right corner is corrected in place.
- *   3. The processed canvas is captured with MediaRecorder, while the original
- *      audio is routed through the Web Audio graph so sound is preserved.
- *
- * Everything happens locally — no upload, no server.
+ * Approach (same as the GargantuaX reference, MIT-licensed): decode the video
+ * with WebCodecs via the `mediabunny` library, run the exact same Reverse Alpha
+ * Blending removal used by the image tool on the bottom-right Veo watermark of
+ * every frame, then re-encode to H.264 MP4 and copy the original audio through
+ * untouched. Everything runs locally — nothing is uploaded.
  */
 export class VideoWatermarkEngine {
     constructor(engine) {
         this.engine = engine; // a ready WatermarkEngine
+        this._mb = null;
     }
 
     static async create() {
@@ -26,168 +23,179 @@ export class VideoWatermarkEngine {
 
     static isSupported() {
         return (
-            typeof MediaRecorder !== 'undefined' &&
-            !!document.createElement('canvas').captureStream
+            typeof VideoEncoder !== 'undefined' &&
+            typeof VideoDecoder !== 'undefined'
         );
     }
 
-    /** Pick the best container/codec this browser can record. */
-    static pickMimeType() {
-        const candidates = [
-            'video/mp4;codecs=avc1.42E01E,mp4a.40.2',
-            'video/webm;codecs=vp9,opus',
-            'video/webm;codecs=vp8,opus',
-            'video/webm',
-        ];
-        for (const type of candidates) {
-            if (MediaRecorder.isTypeSupported(type)) return type;
-        }
-        return '';
+    async _lib() {
+        if (!this._mb) this._mb = await import('mediabunny');
+        return this._mb;
+    }
+
+    /**
+     * Veo watermark geometry (bottom-right corner). Mirrors the reference
+     * catalog: size ≈ shortSide/15, margin ≈ shortSide/10.
+     */
+    getVeoWatermark(width, height) {
+        const base = Math.min(width, height);
+        let size = Math.round(base / 15);
+        size = Math.max(24, Math.min(size, base));
+        const margin = Math.round(base / 10);
+        return {
+            size,
+            x: Math.max(0, width - margin - size),
+            y: Math.max(0, height - margin - size),
+            width: size,
+            height: size,
+        };
     }
 
     /**
      * @param {File} file
-     * @param {(p:{phase:string, progress:number})=>void} [onProgress]
+     * @param {(p:{progress:number})=>void} [onProgress]
      */
     async process(file, onProgress = () => {}) {
-        const objectUrl = URL.createObjectURL(file);
+        const mb = await this._lib();
+        const {
+            ALL_FORMATS,
+            BlobSource,
+            BufferTarget,
+            CanvasSource,
+            EncodedAudioPacketSource,
+            EncodedPacketSink,
+            Input,
+            Mp4OutputFormat,
+            Output,
+            QUALITY_HIGH,
+            VideoSampleSink,
+            canEncodeVideo,
+        } = mb;
 
-        const video = document.createElement('video');
-        video.src = objectUrl;
-        video.crossOrigin = 'anonymous';
-        video.playsInline = true;
-        video.preload = 'auto';
-
-        // Load metadata to learn dimensions / duration.
-        await new Promise((resolve, reject) => {
-            video.onloadedmetadata = () => resolve();
-            video.onerror = () => reject(new Error('Could not read this video file.'));
-        });
-
-        const width = video.videoWidth;
-        const height = video.videoHeight;
-        if (!width || !height) {
-            URL.revokeObjectURL(objectUrl);
-            throw new Error('This video has no decodable video track.');
+        if (canEncodeVideo && !(await canEncodeVideo('avc'))) {
+            throw new Error(
+                'Your browser cannot encode H.264 video locally. Please try the latest Chrome or Edge on desktop.'
+            );
         }
-        const duration = isFinite(video.duration) ? video.duration : 0;
 
-        // Cache the alpha map for this resolution so per-frame work is sync.
-        const { config, alphaMap } = await this.engine.prepareForSize(width, height);
-        const region = { x: 0, y: 0, width: config.width, height: config.height };
+        const originalUrl = URL.createObjectURL(file);
+        const input = new Input({ source: new BlobSource(file), formats: ALL_FORMATS });
 
-        const canvas = document.createElement('canvas');
-        canvas.width = width;
-        canvas.height = height;
+        const videoTrack = await input.getPrimaryVideoTrack();
+        if (!videoTrack) {
+            input.dispose?.();
+            URL.revokeObjectURL(originalUrl);
+            throw new Error('No decodable video track was found in this file.');
+        }
+
+        const width = videoTrack.displayWidth ?? videoTrack.codedWidth;
+        const height = videoTrack.displayHeight ?? videoTrack.codedHeight;
+        const duration = await input.computeDuration().catch(() => 0);
+
+        let frameRate = 30;
+        try {
+            const stats = await videoTrack.computePacketStats(120);
+            if (stats?.averagePacketRate) frameRate = Math.round(stats.averagePacketRate);
+        } catch { /* keep default */ }
+
+        // Watermark region + matching alpha map (scaled Gemini sparkle).
+        const wm = this.getVeoWatermark(width, height);
+        const alphaMap = this.engine.buildScaledAlphaMap(wm.size);
+        const region = { x: 0, y: 0, width: wm.size, height: wm.size };
+
+        const canvas =
+            typeof OffscreenCanvas !== 'undefined'
+                ? new OffscreenCanvas(width, height)
+                : Object.assign(document.createElement('canvas'), { width, height });
         const ctx = canvas.getContext('2d', { willReadFrequently: true });
 
-        // --- Build the recording stream (video frames + original audio) ---
-        const canvasStream = canvas.captureStream();
-        let audioCtx = null;
+        // --- Output setup ---
+        const target = new BufferTarget();
+        const output = new Output({ format: new Mp4OutputFormat(), target });
+        const videoSource = new CanvasSource(canvas, {
+            codec: 'avc',
+            bitrate: QUALITY_HIGH,
+        });
+        output.addVideoTrack(videoSource, { frameRate });
+
+        // --- Audio passthrough (best-effort, no re-encode) ---
+        let audioSource = null;
+        let audioTrack = null;
+        let audioDecoderConfig = null;
         try {
-            if (this._hasAudio(video)) {
-                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-                if (audioCtx.state === 'suspended') await audioCtx.resume();
-                const source = audioCtx.createMediaElementSource(video);
-                const dest = audioCtx.createMediaStreamDestination();
-                // Route ONLY to the recording destination — not to speakers —
-                // so processing stays silent for the user.
-                source.connect(dest);
-                dest.stream.getAudioTracks().forEach((t) => canvasStream.addTrack(t));
+            audioTrack = await input.getPrimaryAudioTrack();
+            if (audioTrack) {
+                const audioCodec = await audioTrack.getCodec();
+                audioDecoderConfig = await audioTrack.getDecoderConfig().catch(() => null);
+                if (audioCodec) {
+                    audioSource = new EncodedAudioPacketSource(audioCodec);
+                    output.addAudioTrack(audioSource);
+                }
             }
         } catch {
-            // Audio routing is best-effort; fall back to video-only output.
-            audioCtx = null;
+            audioSource = null;
         }
 
-        const mimeType = VideoWatermarkEngine.pickMimeType();
-        const recorder = new MediaRecorder(
-            canvasStream,
-            mimeType ? { mimeType, videoBitsPerSecond: 12_000_000 } : undefined
-        );
-        const chunks = [];
-        recorder.ondataavailable = (e) => {
-            if (e.data && e.data.size) chunks.push(e.data);
-        };
+        await output.start();
 
-        const drawFrame = () => {
-            ctx.drawImage(video, 0, 0, width, height);
-            // Only touch the small watermark rectangle — cheap per frame.
-            const px = ctx.getImageData(config.x, config.y, config.width, config.height);
+        // --- Process every video frame ---
+        const fallbackDur = frameRate > 0 ? 1 / frameRate : 1 / 30;
+        const sink = new VideoSampleSink(videoTrack);
+        for await (const sample of sink.samples()) {
+            const timestamp = Math.max(0, sample.timestamp);
+            const dur =
+                Number.isFinite(sample.duration) && sample.duration > 0
+                    ? sample.duration
+                    : fallbackDur;
+
+            sample.draw(ctx, 0, 0, width, height);
+            sample.close();
+
+            // Reverse Alpha Blending on just the corner watermark rectangle.
+            const px = ctx.getImageData(wm.x, wm.y, wm.width, wm.height);
             removeWatermark(px, alphaMap, region);
-            ctx.putImageData(px, config.x, config.y);
-        };
+            ctx.putImageData(px, wm.x, wm.y);
 
-        const done = new Promise((resolve, reject) => {
-            recorder.onstop = () => {
-                const type = (mimeType || 'video/webm').split(';')[0];
-                resolve(new Blob(chunks, { type }));
-            };
-            recorder.onerror = (e) => reject(e.error || new Error('Recording failed.'));
-        });
+            await videoSource.add(timestamp, dur);
+            if (duration) onProgress({ progress: Math.min(0.99, timestamp / duration) });
+        }
+        videoSource.close();
 
-        // --- Drive playback frame by frame ---
-        const useRVFC = 'requestVideoFrameCallback' in HTMLVideoElement.prototype;
-
-        await new Promise((resolve, reject) => {
-            let stopped = false;
-            const finish = () => {
-                if (stopped) return;
-                stopped = true;
-                try { if (recorder.state !== 'inactive') recorder.stop(); } catch {}
-                resolve();
-            };
-
-            video.onended = finish;
-            video.onerror = () => { if (!stopped) { stopped = true; reject(new Error('Playback error.')); } };
-
-            const tick = () => {
-                if (stopped) return;
-                drawFrame();
-                if (duration) {
-                    onProgress({ phase: 'processing', progress: Math.min(1, video.currentTime / duration) });
+        // --- Copy audio packets through ---
+        if (audioSource) {
+            try {
+                const aSink = new EncodedPacketSink(audioTrack);
+                for await (const packet of aSink.packets()) {
+                    await audioSource.add(packet, {
+                        decoderConfig: audioDecoderConfig ?? undefined,
+                    });
                 }
-                if (useRVFC) {
-                    video.requestVideoFrameCallback(tick);
-                } else {
-                    if (video.ended || video.paused) return finish();
-                    requestAnimationFrame(tick);
-                }
-            };
+            } catch (e) {
+                console.warn('Audio passthrough failed; exporting video only.', e);
+            } finally {
+                audioSource.close();
+            }
+        }
 
-            recorder.start();
-            // First frame, then start playback + the frame loop.
-            video.play().then(() => {
-                drawFrame();
-                if (useRVFC) video.requestVideoFrameCallback(tick);
-                else requestAnimationFrame(tick);
-            }).catch(reject);
-        });
+        await output.finalize();
+        input.dispose?.();
 
-        const blob = await done;
+        if (!target.buffer) {
+            URL.revokeObjectURL(originalUrl);
+            throw new Error('Video export produced no output.');
+        }
 
-        // Cleanup
-        try { if (audioCtx) await audioCtx.close(); } catch {}
+        const blob = new Blob([target.buffer], { type: 'video/mp4' });
+        onProgress({ progress: 1 });
 
-        const isMp4 = (mimeType || '').startsWith('video/mp4');
         return {
             blob,
             url: URL.createObjectURL(blob),
-            originalUrl: objectUrl,
-            ext: isMp4 ? 'mp4' : 'webm',
-            mime: blob.type,
+            originalUrl,
+            ext: 'mp4',
+            mime: 'video/mp4',
             width,
             height,
         };
-    }
-
-    _hasAudio(video) {
-        // Best-effort audio detection across browsers.
-        if (typeof video.mozHasAudio === 'boolean') return video.mozHasAudio;
-        if (typeof video.webkitAudioDecodedByteCount === 'number') {
-            return video.webkitAudioDecodedByteCount > 0;
-        }
-        if (video.audioTracks) return video.audioTracks.length > 0;
-        return true; // assume yes; routing is wrapped in try/catch
     }
 }
