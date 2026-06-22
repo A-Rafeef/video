@@ -28,7 +28,7 @@ function toggleTheme() {
     <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
       <!-- Logo / brand -->
       <a href="/" class="flex items-center gap-2 overflow-hidden no-underline">
-        <span class="text-3xl select-none" aria-hidden="true">✨</span>
+        <img src="/assets/logo.svg" alt="Gemini Watermark Remover" width="32" height="32" class="w-8 h-8 select-none" />
         <p
           class="text-lg md:text-xl font-bold text-slate-900 dark:text-white whitespace-nowrap tracking-tight m-0"
         >
