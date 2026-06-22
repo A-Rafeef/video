@@ -51,7 +51,7 @@
 
       <p class="text-xs text-slate-400 dark:text-slate-600 mt-6">
         Disclaimer: This project is not affiliated with Google Gemini. <br />
-        &copy; 2026 AI Sparkle Remover. All rights reserved.
+        &copy; 2026 Gemini Watermark Remover. All rights reserved.
       </p>
     </div>
   </footer>

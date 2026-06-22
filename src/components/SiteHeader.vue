@@ -32,7 +32,7 @@ function toggleTheme() {
         <p
           class="text-lg md:text-xl font-bold text-slate-900 dark:text-white whitespace-nowrap tracking-tight m-0"
         >
-          AI Sparkle <span class="text-brand-primary">Remover</span>
+          Gemini Watermark <span class="text-brand-primary">Remover</span>
         </p>
       </a>
 

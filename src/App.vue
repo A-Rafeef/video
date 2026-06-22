@@ -22,17 +22,17 @@ const tab = ref('image'); // 'image' | 'video'
         id="hero-heading"
         class="text-3xl md:text-5xl font-extrabold mb-3 text-slate-900 dark:text-white tracking-tight"
       >
-        Remove
+        Gemini
         <span
           class="text-transparent bg-clip-text bg-gradient-to-r from-brand-primary via-brand-secondary to-brand-accent"
-          >AI Sparkle Watermark</span
+          >Watermark Remover</span
         >
       </h1>
       <p
         class="text-slate-500 dark:text-slate-400 max-w-xl mx-auto font-medium text-base md:text-lg mb-6"
       >
-        Remove the visible ✨ sparkle watermark from Gemini AI
-        <strong>images</strong> and <strong>videos</strong>.
+        Remove the visible ✨ sparkle watermark from Google Gemini AI
+        <strong>images</strong> and the new Gemini <strong>Veo videos</strong>.
         <span class="text-brand-primary dark:text-brand-secondary font-semibold"
           >Free, fast, lossless &amp; private.</span
         >

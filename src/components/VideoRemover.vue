@@ -135,7 +135,7 @@ function reset() {
           ></iconify-icon>
         </div>
         <p class="mb-1 text-base font-bold text-slate-700 dark:text-slate-200 group-hover:text-brand-primary transition-colors">
-          Click to upload or drag a video
+          Click to upload or drag a Gemini Veo video
         </p>
         <p class="text-sm text-slate-400 dark:text-slate-500">MP4, WebM, MOV · Audio is preserved</p>
       </div>
