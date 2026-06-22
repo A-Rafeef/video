@@ -280,93 +280,30 @@ export class VideoWatermarkEngine {
             if (sampled >= MAX_SAMPLES) break;
         }
 
-        // Turn the brightness floor into an alpha map via LOCAL BACKGROUND
-        // SUBTRACTION. A watermark only adds brightness on top of the content,
-        // so at each pixel:  floor = alpha*255 + (1-alpha)*localBackground.
-        // Solving for alpha:  alpha = (floor - bg) / (255 - bg).
-        // Static background ⇒ floor ≈ bg ⇒ alpha ≈ 0 (no corner shadow), while
-        // the watermark — core AND faint edges — rises above its local
-        // background and is recovered cleanly (no dark ghost).
-        const W = roi.width;
-        const H = roi.height;
-
-        // Robust background level (30th percentile of the floor), used to mask
-        // out likely-watermark pixels so they don't inflate the local estimate.
-        const bg0 = this._percentile(minMax, count, 0.30);
-        const bgField = new Float32Array(count);
-        for (let i = 0; i < count; i++) {
-            bgField[i] = minMax[i] > bg0 + 18 ? bg0 : minMax[i];
-        }
-        // Smooth, gradient-aware local background.
-        const radius = Math.max(8, Math.round(this.getVeoWatermark(width, height).size * 0.9));
-        const background = this._boxBlur(bgField, W, H, radius);
-
-        const NOISE = 6; // brightness units; ignore sub-noise excess
-        const MAX_ALPHA = 0.99;
+        // Convert the brightness floor into an alpha map. A watermark pixel sits
+        // at >= alpha*255, so alpha ≈ minBrightness / 255. Background pixels that
+        // simply never went fully dark are suppressed with a small floor.
+        const NOISE_FLOOR = 3 / 255;
+        const SUPPRESS_BELOW = 0.002; // keep almost all signal (matches image ALPHA_THRESHOLD)
         const alphaMap = new Float32Array(count);
         let active = 0;
         for (let i = 0; i < count; i++) {
-            const bg = background[i];
-            const excess = minMax[i] - bg - NOISE;
-            if (excess <= 0) continue;
-            const denom = 255 - bg;
-            if (denom <= 1) continue;
-            const a = Math.min(excess / denom, MAX_ALPHA);
-            if (a <= 0) continue;
-            alphaMap[i] = a;
-            active++;
+            let a = minMax[i] / 255 - NOISE_FLOOR;
+            if (a < SUPPRESS_BELOW) {
+                alphaMap[i] = 0;
+            } else {
+                alphaMap[i] = a;
+                active++;
+            }
         }
 
-        // Guard: if calibration found nothing, or flagged an implausibly large
-        // area (no clear watermark / very bright clip), fall back to the scaled
-        // sparkle template confined to the expected watermark position.
-        if (active < 8 || active > count * 0.6) {
+        // Fallback: if calibration found basically nothing (e.g. a very short or
+        // static clip), fall back to the scaled sparkle template placed in the
+        // ROI at the expected watermark position.
+        if (active < 8) {
             return this._templateRoiAlpha(roi, this.getVeoWatermark(width, height));
         }
         return alphaMap;
-    }
-
-    /** Returns the value at percentile p (0..1) of a 0..255 array. */
-    _percentile(values, count, p) {
-        const hist = new Float64Array(256);
-        for (let i = 0; i < count; i++) hist[values[i] | 0]++;
-        const target = p * count;
-        let acc = 0;
-        for (let t = 0; t < 256; t++) {
-            acc += hist[t];
-            if (acc >= target) return t;
-        }
-        return 255;
-    }
-
-    /** Separable box blur over a W×H Float32 field (edge-clamped average). */
-    _boxBlur(src, W, H, radius) {
-        const tmp = new Float32Array(W * H);
-        const out = new Float32Array(W * H);
-        // Horizontal pass
-        for (let y = 0; y < H; y++) {
-            const row = y * W;
-            for (let x = 0; x < W; x++) {
-                let sum = 0;
-                let n = 0;
-                const a = Math.max(0, x - radius);
-                const b = Math.min(W - 1, x + radius);
-                for (let k = a; k <= b; k++) { sum += src[row + k]; n++; }
-                tmp[row + x] = sum / n;
-            }
-        }
-        // Vertical pass
-        for (let x = 0; x < W; x++) {
-            for (let y = 0; y < H; y++) {
-                let sum = 0;
-                let n = 0;
-                const a = Math.max(0, y - radius);
-                const b = Math.min(H - 1, y + radius);
-                for (let k = a; k <= b; k++) { sum += tmp[k * W + x]; n++; }
-                out[y * W + x] = sum / n;
-            }
-        }
-        return out;
     }
 
     /** Template fallback: scaled Gemini sparkle alpha placed within the ROI. */
