@@ -116,13 +116,6 @@ npm run build:css
 npm run dev
 ```
 
-## 📦 Build & Deploy (Cloudflare Pages)
-
-```bash
-npm run build      # builds css/output.css + Vite app into /dist
-```
-
-
 ## ⚠️ Disclaimer
 
 This tool is for **educational and personal use only**.
