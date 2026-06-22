@@ -4,9 +4,11 @@ import { removeWatermark } from './blendModes.js';
 /**
  * Client-side Gemini Veo video watermark remover.
  *
- * Approach: decode the video with WebCodecs via the `mediabunny` library,
- * run the exact same Reverse Alpha Blending removal used by the image tool
- * on the bottom-right watermark of every frame, then re-encode to H.264 MP4.
+ * Approach (same as the GargantuaX reference, MIT-licensed): decode the video
+ * with WebCodecs via the `mediabunny` library, run the exact same Reverse Alpha
+ * Blending removal used by the image tool on the bottom-right Veo watermark of
+ * every frame, then re-encode to H.264 MP4 and copy the original audio through
+ * untouched. Everything runs locally - nothing is uploaded.
  */
 export class VideoWatermarkEngine {
     constructor(engine) {
@@ -29,6 +31,24 @@ export class VideoWatermarkEngine {
     async _lib() {
         if (!this._mb) this._mb = await import('mediabunny');
         return this._mb;
+    }
+
+    /**
+     * Veo watermark geometry (bottom-right corner). Mirrors the reference
+     * catalog: size ≈ shortSide/15, margin ≈ shortSide/10.
+     */
+    getVeoWatermark(width, height) {
+        const base = Math.min(width, height);
+        let size = Math.round(base / 15);
+        size = Math.max(24, Math.min(size, base));
+        const margin = Math.round(base / 10);
+        return {
+            size,
+            x: Math.max(0, width - margin - size),
+            y: Math.max(0, height - margin - size),
+            width: size,
+            height: size,
+        };
     }
 
     /**
@@ -78,11 +98,10 @@ export class VideoWatermarkEngine {
             if (stats?.averagePacketRate) frameRate = Math.round(stats.averagePacketRate);
         } catch { /* keep default */ }
 
-        // FIX: Use the exact same pristine alpha map and fixed size (48 or 96) as the Image Remover.
-        // Scaling the alpha map caused interpolation artifacts resulting in a darkened/shadowed box.
-        const prepared = await this.engine.prepareForSize(width, height);
-        const { config, alphaMap } = prepared;
-        const region = { x: 0, y: 0, width: config.width, height: config.height };
+        // Watermark region + matching alpha map (scaled Gemini sparkle).
+        const wm = this.getVeoWatermark(width, height);
+        const alphaMap = this.engine.buildScaledAlphaMap(wm.size);
+        const region = { x: 0, y: 0, width: wm.size, height: wm.size };
 
         const canvas =
             typeof OffscreenCanvas !== 'undefined'
@@ -121,6 +140,7 @@ export class VideoWatermarkEngine {
         await output.start();
 
         // --- Process every video frame ---
+        // FIX 1: WebCodecs requires timestamps and durations to be in microseconds (1e6 per second).
         const fallbackDur = frameRate > 0 ? Math.round(1e6 / frameRate) : Math.round(1e6 / 30);
         const sink = new VideoSampleSink(videoTrack);
         let firstTimestamp = null;
@@ -141,10 +161,9 @@ export class VideoWatermarkEngine {
             sample.close();
 
             // Reverse Alpha Blending on just the corner watermark rectangle.
-            // Reading only the small patch is mathematically identical to processing the full frame, but much faster.
-            const px = ctx.getImageData(config.x, config.y, config.width, config.height);
+            const px = ctx.getImageData(wm.x, wm.y, wm.width, wm.height);
             removeWatermark(px, alphaMap, region);
-            ctx.putImageData(px, config.x, config.y);
+            ctx.putImageData(px, wm.x, wm.y);
 
             await videoSource.add(timestamp, dur);
             if (duration) onProgress({ progress: Math.min(0.99, timestamp / duration) });
@@ -169,6 +188,7 @@ export class VideoWatermarkEngine {
 
                     let outPacket = packet;
                     if (newTs !== packet.timestamp) {
+                        // FIX 2: Manual cloning for WebCodecs where .clone() is unavailable
                         if (typeof packet.clone === 'function') {
                             outPacket = packet.clone({ timestamp: newTs });
                         } else if (typeof EncodedAudioChunk !== 'undefined' && packet instanceof EncodedAudioChunk) {
@@ -183,6 +203,7 @@ export class VideoWatermarkEngine {
                         }
                     }
                     
+                    // FIX 3: Pass decoder config only on the first packet to avoid muxer assertion crashes
                     await audioSource.add(outPacket, isFirstAudio && audioDecoderConfig ? {
                         decoderConfig: audioDecoderConfig
                     } : undefined);
