@@ -281,30 +281,59 @@ export class VideoWatermarkEngine {
         }
 
         // Convert the brightness floor into an alpha map. A watermark pixel sits
-        // at >= alpha*255, so alpha ≈ minBrightness / 255. Background pixels that
-        // simply never went fully dark are suppressed with a floor so we don't
-        // touch real content.
+        // at >= alpha*255, so alpha ≈ minBrightness / 255. The hard part is
+        // telling the bright watermark apart from a static-but-not-dark corner
+        // (e.g. a stone floor) — otherwise the whole corner gets darkened.
+        // We separate the two clusters with an adaptive Otsu threshold on the
+        // brightness floor, keeping only the genuinely watermark-bright pixels.
         const NOISE_FLOOR = 3 / 255;
-        const SUPPRESS_BELOW = 0.06; // ignore < 6% — almost certainly background
+        let thr = this._otsu(minMax, count);            // 0..255
+        thr = Math.min(Math.max(thr, 0.30 * 255), 0.85 * 255);
+
         const alphaMap = new Float32Array(count);
         let active = 0;
         for (let i = 0; i < count; i++) {
-            let a = minMax[i] / 255 - NOISE_FLOOR;
-            if (a < SUPPRESS_BELOW) {
-                alphaMap[i] = 0;
-            } else {
-                alphaMap[i] = a;
-                active++;
-            }
+            if (minMax[i] < thr) { alphaMap[i] = 0; continue; }
+            const a = minMax[i] / 255 - NOISE_FLOOR;
+            if (a <= 0) { alphaMap[i] = 0; continue; }
+            alphaMap[i] = a;
+            active++;
         }
 
-        // Fallback: if calibration found basically nothing (e.g. a very short or
-        // static clip), fall back to the scaled sparkle template placed in the
-        // ROI at the expected watermark position.
-        if (active < 8) {
+        // Guard: if calibration found nothing, or flagged an implausibly large
+        // area (no clear watermark / very bright clip), fall back to the scaled
+        // sparkle template confined to the expected watermark position.
+        if (active < 8 || active > count * 0.6) {
             return this._templateRoiAlpha(roi, this.getVeoWatermark(width, height));
         }
         return alphaMap;
+    }
+
+    /** Otsu's method: returns the 0..255 threshold splitting two brightness clusters. */
+    _otsu(values, count) {
+        const hist = new Float64Array(256);
+        for (let i = 0; i < count; i++) hist[values[i] | 0]++;
+
+        let total = 0;
+        let sum = 0;
+        for (let t = 0; t < 256; t++) { total += hist[t]; sum += t * hist[t]; }
+
+        let sumB = 0;
+        let wB = 0;
+        let maxBetween = 0;
+        let threshold = 0;
+        for (let t = 0; t < 256; t++) {
+            wB += hist[t];
+            if (wB === 0) continue;
+            const wF = total - wB;
+            if (wF === 0) break;
+            sumB += t * hist[t];
+            const mB = sumB / wB;
+            const mF = (sum - sumB) / wF;
+            const between = wB * wF * (mB - mF) * (mB - mF);
+            if (between > maxBetween) { maxBetween = between; threshold = t; }
+        }
+        return threshold;
     }
 
     /** Template fallback: scaled Gemini sparkle alpha placed within the ROI. */
