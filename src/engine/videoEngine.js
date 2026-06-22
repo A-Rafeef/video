@@ -280,28 +280,41 @@ export class VideoWatermarkEngine {
             if (sampled >= MAX_SAMPLES) break;
         }
 
-        // Convert the brightness floor into an alpha map. A watermark pixel sits
-        // at >= alpha*255, so alpha ≈ minBrightness / 255. Background pixels that
-        // simply never went fully dark are suppressed with a small floor.
-        const NOISE_FLOOR = 3 / 255;
-        const SUPPRESS_BELOW = 0.002; // keep almost all signal (matches image ALPHA_THRESHOLD)
-        const alphaMap = new Float32Array(count);
-        let active = 0;
-        for (let i = 0; i < count; i++) {
-            let a = minMax[i] / 255 - NOISE_FLOOR;
-            if (a < SUPPRESS_BELOW) {
-                alphaMap[i] = 0;
-            } else {
-                alphaMap[i] = a;
-                active++;
-            }
-        }
+        // Use the Gemini sparkle TEMPLATE for the watermark SHAPE — so only the
+        // logo pixels are ever altered, never the surrounding background (no
+        // black box, no corner shadow, no halo on any video). We only calibrate
+        // its STRENGTH: a scalar gain estimated from the video's own brightness
+        // floor over the logo core.
+        const wmGeom = this.getVeoWatermark(width, height);
+        const template = this._templateRoiAlpha(roi, wmGeom); // alpha shape, 0..1
 
-        // Fallback: if calibration found basically nothing (e.g. a very short or
-        // static clip), fall back to the scaled sparkle template placed in the
-        // ROI at the expected watermark position.
-        if (active < 8) {
-            return this._templateRoiAlpha(roi, this.getVeoWatermark(width, height));
+        let tMax = 0;
+        for (let i = 0; i < count; i++) if (template[i] > tMax) tMax = template[i];
+        if (tMax <= 0) return template;
+
+        // gain ≈ median over the logo core of  floorBrightness / (alpha * 255).
+        // For a watermarked pixel whose underlying content goes dark in some
+        // frame, the brightness floor ≈ gain * alpha * 255, so this recovers the
+        // real opacity relative to the template.
+        const coreCut = 0.5 * tMax;
+        const cand = [];
+        for (let i = 0; i < count; i++) {
+            if (template[i] < coreCut) continue;
+            const g = minMax[i] / (template[i] * 255);
+            if (Number.isFinite(g) && g > 0) cand.push(g);
+        }
+        let gain = 1;
+        if (cand.length) {
+            cand.sort((a, b) => a - b);
+            gain = cand[cand.length >> 1];
+        }
+        gain = Math.min(Math.max(gain, 0.5), 4); // sane clamp
+
+        const MAX_ALPHA = 0.99;
+        const alphaMap = new Float32Array(count);
+        for (let i = 0; i < count; i++) {
+            const a = template[i] * gain;
+            alphaMap[i] = a > 0 ? Math.min(a, MAX_ALPHA) : 0;
         }
         return alphaMap;
     }
