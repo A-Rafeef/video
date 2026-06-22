@@ -8,7 +8,7 @@ import { removeWatermark } from './blendModes.js';
  * with WebCodecs via the `mediabunny` library, run the exact same Reverse Alpha
  * Blending removal used by the image tool on the bottom-right Veo watermark of
  * every frame, then re-encode to H.264 MP4 and copy the original audio through
- * untouched. Everything runs locally — nothing is uploaded.
+ * untouched. Everything runs locally - nothing is uploaded.
  */
 export class VideoWatermarkEngine {
     constructor(engine) {
@@ -127,8 +127,7 @@ export class VideoWatermarkEngine {
             if (audioTrack) {
                 const audioCodec = await audioTrack.getCodec();
                 audioDecoderConfig = await audioTrack.getDecoderConfig().catch(() => null);
-                // Only carry audio if we have a codec AND a decoder config —
-                // mediabunny asserts on the first packet without one.
+                // Only carry audio if we have a codec AND a decoder config
                 if (audioCodec && audioDecoderConfig) {
                     audioSource = new EncodedAudioPacketSource(audioCodec);
                     output.addAudioTrack(audioSource);
@@ -141,9 +140,8 @@ export class VideoWatermarkEngine {
         await output.start();
 
         // --- Process every video frame ---
-        // mediabunny requires timestamps to start at 0 and be strictly
-        // increasing, so normalise against the first frame's timestamp.
-        const fallbackDur = frameRate > 0 ? 1 / frameRate : 1 / 30;
+        // FIX 1: WebCodecs requires timestamps and durations to be in microseconds (1e6 per second).
+        const fallbackDur = frameRate > 0 ? Math.round(1e6 / frameRate) : Math.round(1e6 / 30);
         const sink = new VideoSampleSink(videoTrack);
         let firstTimestamp = null;
         let lastTimestamp = -1;
@@ -177,19 +175,39 @@ export class VideoWatermarkEngine {
             try {
                 const offset = firstTimestamp ?? 0;
                 const aSink = new EncodedPacketSink(audioTrack);
+                let isFirstAudio = true;
+                let lastAudioTs = -1;
+                
                 for await (const packet of aSink.packets()) {
+                    let newTs = packet.timestamp - offset;
+                    if (newTs < 0) continue;
+                    
+                    // Ensure strictly increasing audio timestamps
+                    if (newTs <= lastAudioTs) newTs = lastAudioTs + 1;
+                    lastAudioTs = newTs;
+
                     let outPacket = packet;
-                    if (offset > 0) {
-                        const newTs = packet.timestamp - offset;
-                        if (newTs < 0) continue;
-                        outPacket =
-                            typeof packet.clone === 'function'
-                                ? packet.clone({ timestamp: newTs })
-                                : packet;
+                    if (newTs !== packet.timestamp) {
+                        // FIX 2: Manual cloning for WebCodecs where .clone() is unavailable
+                        if (typeof packet.clone === 'function') {
+                            outPacket = packet.clone({ timestamp: newTs });
+                        } else if (typeof EncodedAudioChunk !== 'undefined' && packet instanceof EncodedAudioChunk) {
+                            const buffer = new ArrayBuffer(packet.byteLength);
+                            packet.copyTo(buffer);
+                            outPacket = new EncodedAudioChunk({
+                                type: packet.type,
+                                timestamp: newTs,
+                                duration: packet.duration,
+                                data: buffer
+                            });
+                        }
                     }
-                    await audioSource.add(outPacket, {
-                        decoderConfig: audioDecoderConfig ?? undefined,
-                    });
+                    
+                    // FIX 3: Pass decoder config only on the first packet to avoid muxer assertion crashes
+                    await audioSource.add(outPacket, isFirstAudio && audioDecoderConfig ? {
+                        decoderConfig: audioDecoderConfig
+                    } : undefined);
+                    isFirstAudio = false;
                 }
             } catch (e) {
                 console.warn('Audio passthrough failed; exporting video only.', e);
