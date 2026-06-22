@@ -10,6 +10,23 @@ A high-performance, **100% client-side** tool for removing the visible Gemini AI
 
 ---
 
+## ✨ Before &amp; After
+
+<table>
+  <tr>
+    <th align="center">Before (watermarked)</th>
+    <th align="center">After (cleaned)</th>
+  </tr>
+  <tr>
+    <td align="center"><img src="public/assets/before.png" alt="Gemini AI image with the visible sparkle watermark" width="100%" /></td>
+    <td align="center"><img src="public/assets/after.png" alt="Gemini AI image after the sparkle watermark was removed" width="100%" /></td>
+  </tr>
+</table>
+
+> The live site also shows this as an interactive drag-to-compare slider.
+
+---
+
 ## 🚀 Features
 
 * **Images & Videos:** Remove the sparkle watermark from Gemini images *and* videos — all in the browser.
