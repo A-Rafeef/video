@@ -4,11 +4,20 @@ import { removeWatermark } from './blendModes.js';
 /**
  * Client-side Gemini Veo video watermark remover.
  *
- * Approach (same as the GargantuaX reference, MIT-licensed): decode the video
- * with WebCodecs via the `mediabunny` library, run the exact same Reverse Alpha
- * Blending removal used by the image tool on the bottom-right Veo watermark of
- * every frame, then re-encode to H.264 MP4 and copy the original audio through
- * untouched. Everything runs locally - nothing is uploaded.
+ * Pipeline (decode/encode via the `mediabunny` WebCodecs library, same as the
+ * GargantuaX reference): the Veo watermark is a static, mostly-white overlay
+ * pinned to the bottom-right corner of every frame. Because the underlying
+ * pixels change over time but the watermark does not, the per-pixel MINIMUM
+ * brightness across frames reveals the watermark's true alpha (a watermarked
+ * pixel can never be darker than `alpha * 255`). We:
+ *
+ *   1. Pass 1 — decode all frames and build a self-calibrated alpha map of the
+ *      corner watermark from the per-pixel min brightness.
+ *   2. Pass 2 — decode again, run the exact same Reverse Alpha Blending removal
+ *      used by the image tool over the corner, re-encode to H.264 MP4, and copy
+ *      the original audio through untouched.
+ *
+ * Everything runs locally; nothing is uploaded.
  */
 export class VideoWatermarkEngine {
     constructor(engine) {
@@ -52,8 +61,20 @@ export class VideoWatermarkEngine {
     }
 
     /**
+     * Region of interest: the bottom-right corner, padded around the expected
+     * watermark box so calibration still works if the geometry is slightly off.
+     */
+    getRoi(width, height, wm) {
+        const padX = Math.round(wm.size * 0.6);
+        const padY = Math.round(wm.size * 0.6);
+        const rx = Math.max(0, wm.x - padX);
+        const ry = Math.max(0, wm.y - padY);
+        return { x: rx, y: ry, width: width - rx, height: height - ry };
+    }
+
+    /**
      * @param {File} file
-     * @param {(p:{progress:number})=>void} [onProgress]
+     * @param {(p:{progress:number, phase?:string})=>void} [onProgress]
      */
     async process(file, onProgress = () => {}) {
         const mb = await this._lib();
@@ -98,10 +119,9 @@ export class VideoWatermarkEngine {
             if (stats?.averagePacketRate) frameRate = Math.round(stats.averagePacketRate);
         } catch { /* keep default */ }
 
-        // Watermark region + matching alpha map (scaled Gemini sparkle).
         const wm = this.getVeoWatermark(width, height);
-        const alphaMap = this.engine.buildScaledAlphaMap(wm.size);
-        const region = { x: 0, y: 0, width: wm.size, height: wm.size };
+        const roi = this.getRoi(width, height, wm);
+        const region = { x: 0, y: 0, width: roi.width, height: roi.height };
 
         const canvas =
             typeof OffscreenCanvas !== 'undefined'
@@ -109,7 +129,12 @@ export class VideoWatermarkEngine {
                 : Object.assign(document.createElement('canvas'), { width, height });
         const ctx = canvas.getContext('2d', { willReadFrequently: true });
 
-        // --- Output setup ---
+        // ─── Pass 1: self-calibrate the watermark alpha map ────────────────
+        const alphaMap = await this._calibrate(
+            mb, videoTrack, ctx, width, height, roi, duration, onProgress
+        );
+
+        // ─── Output setup ──────────────────────────────────────────────────
         const target = new BufferTarget();
         const output = new Output({ format: new Mp4OutputFormat(), target });
         const videoSource = new CanvasSource(canvas, {
@@ -120,7 +145,7 @@ export class VideoWatermarkEngine {
         });
         output.addVideoTrack(videoSource, { frameRate });
 
-        // --- Audio passthrough (best-effort, no re-encode) ---
+        // Audio passthrough (best-effort, no re-encode).
         let audioSource = null;
         let audioTrack = null;
         let audioDecoderConfig = null;
@@ -129,7 +154,6 @@ export class VideoWatermarkEngine {
             if (audioTrack) {
                 const audioCodec = await audioTrack.getCodec();
                 audioDecoderConfig = await audioTrack.getDecoderConfig().catch(() => null);
-                // Only carry audio if we have a codec AND a decoder config
                 if (audioCodec && audioDecoderConfig) {
                     audioSource = new EncodedAudioPacketSource(audioCodec);
                     output.addAudioTrack(audioSource);
@@ -141,9 +165,7 @@ export class VideoWatermarkEngine {
 
         await output.start();
 
-        // --- Process every video frame ---
-        // mediabunny's high-level API uses SECONDS for all timestamps/durations
-        // (not raw WebCodecs microseconds).
+        // ─── Pass 2: remove watermark per frame and encode ─────────────────
         const fallbackDur = frameRate > 0 ? 1 / frameRate : 1 / 30;
         const sink = new VideoSampleSink(videoTrack);
         let firstTimestamp = null;
@@ -163,53 +185,38 @@ export class VideoWatermarkEngine {
             sample.draw(ctx, 0, 0, width, height);
             sample.close();
 
-            // Reverse Alpha Blending on just the corner watermark rectangle.
-            const px = ctx.getImageData(wm.x, wm.y, wm.width, wm.height);
+            const px = ctx.getImageData(roi.x, roi.y, roi.width, roi.height);
             removeWatermark(px, alphaMap, region);
-            ctx.putImageData(px, wm.x, wm.y);
+            ctx.putImageData(px, roi.x, roi.y);
 
             await videoSource.add(timestamp, dur);
-            if (duration) onProgress({ progress: Math.min(0.99, timestamp / duration) });
+            if (duration) {
+                onProgress({ phase: 'encoding', progress: 0.5 + Math.min(0.49, (timestamp / duration) * 0.5) });
+            }
         }
         videoSource.close();
 
-        // --- Copy audio packets through (aligned to the same time origin) ---
+        // Copy audio packets through, aligned to the same time origin.
         if (audioSource) {
             try {
                 const offset = firstTimestamp ?? 0;
                 const aSink = new EncodedPacketSink(audioTrack);
                 let isFirstAudio = true;
                 let lastAudioTs = -1;
-                
                 for await (const packet of aSink.packets()) {
                     let newTs = packet.timestamp - offset;
                     if (newTs < 0) continue;
-                    
-                    // Ensure strictly increasing audio timestamps (seconds).
                     if (newTs <= lastAudioTs) newTs = lastAudioTs + 1e-6;
                     lastAudioTs = newTs;
 
                     let outPacket = packet;
-                    if (newTs !== packet.timestamp) {
-                        // FIX 2: Manual cloning for WebCodecs where .clone() is unavailable
-                        if (typeof packet.clone === 'function') {
-                            outPacket = packet.clone({ timestamp: newTs });
-                        } else if (typeof EncodedAudioChunk !== 'undefined' && packet instanceof EncodedAudioChunk) {
-                            const buffer = new ArrayBuffer(packet.byteLength);
-                            packet.copyTo(buffer);
-                            outPacket = new EncodedAudioChunk({
-                                type: packet.type,
-                                timestamp: newTs,
-                                duration: packet.duration,
-                                data: buffer
-                            });
-                        }
+                    if (newTs !== packet.timestamp && typeof packet.clone === 'function') {
+                        outPacket = packet.clone({ timestamp: newTs });
                     }
-                    
-                    // FIX 3: Pass decoder config only on the first packet to avoid muxer assertion crashes
-                    await audioSource.add(outPacket, isFirstAudio && audioDecoderConfig ? {
-                        decoderConfig: audioDecoderConfig
-                    } : undefined);
+                    await audioSource.add(
+                        outPacket,
+                        isFirstAudio && audioDecoderConfig ? { decoderConfig: audioDecoderConfig } : undefined
+                    );
                     isFirstAudio = false;
                 }
             } catch (e) {
@@ -228,7 +235,7 @@ export class VideoWatermarkEngine {
         }
 
         const blob = new Blob([target.buffer], { type: 'video/mp4' });
-        onProgress({ progress: 1 });
+        onProgress({ phase: 'done', progress: 1 });
 
         return {
             blob,
@@ -239,5 +246,90 @@ export class VideoWatermarkEngine {
             width,
             height,
         };
+    }
+
+    /**
+     * Pass 1: decode frames and estimate the watermark alpha map from the
+     * per-pixel minimum brightness inside the ROI. Returns a Float32Array
+     * (roi.width × roi.height) of alpha values in [0, 1].
+     */
+    async _calibrate(mb, videoTrack, ctx, width, height, roi, duration, onProgress) {
+        const { VideoSampleSink } = mb;
+        const count = roi.width * roi.height;
+        const minMax = new Float32Array(count).fill(255);
+
+        const MAX_SAMPLES = 480; // bound calibration time on long clips
+        let sampled = 0;
+
+        const sink = new VideoSampleSink(videoTrack);
+        for await (const sample of sink.samples()) {
+            sample.draw(ctx, 0, 0, width, height);
+            sample.close();
+
+            const data = ctx.getImageData(roi.x, roi.y, roi.width, roi.height).data;
+            for (let i = 0; i < count; i++) {
+                const o = i * 4;
+                const m = Math.max(data[o], data[o + 1], data[o + 2]);
+                if (m < minMax[i]) minMax[i] = m;
+            }
+
+            sampled++;
+            if (duration && sample.timestamp) {
+                onProgress({ phase: 'analyzing', progress: Math.min(0.49, (sample.timestamp / duration) * 0.5) });
+            }
+            if (sampled >= MAX_SAMPLES) break;
+        }
+
+        // Convert the brightness floor into an alpha map. A watermark pixel sits
+        // at >= alpha*255, so alpha ≈ minBrightness / 255. Background pixels that
+        // simply never went fully dark are suppressed with a floor so we don't
+        // touch real content.
+        const NOISE_FLOOR = 3 / 255;
+        const SUPPRESS_BELOW = 0.06; // ignore < 6% — almost certainly background
+        const alphaMap = new Float32Array(count);
+        let active = 0;
+        for (let i = 0; i < count; i++) {
+            let a = minMax[i] / 255 - NOISE_FLOOR;
+            if (a < SUPPRESS_BELOW) {
+                alphaMap[i] = 0;
+            } else {
+                alphaMap[i] = a;
+                active++;
+            }
+        }
+
+        // Fallback: if calibration found basically nothing (e.g. a very short or
+        // static clip), fall back to the scaled sparkle template placed in the
+        // ROI at the expected watermark position.
+        if (active < 8) {
+            return this._templateRoiAlpha(roi, this.getVeoWatermark(width, height));
+        }
+        return alphaMap;
+    }
+
+    /** Template fallback: scaled Gemini sparkle alpha placed within the ROI. */
+    _templateRoiAlpha(roi, wm) {
+        const count = roi.width * roi.height;
+        const alphaMap = new Float32Array(count);
+        const offX = wm.x - roi.x;
+        const offY = wm.y - roi.y;
+
+        const c = document.createElement('canvas');
+        c.width = wm.size; c.height = wm.size;
+        const cx = c.getContext('2d', { willReadFrequently: true });
+        cx.imageSmoothingEnabled = true;
+        cx.imageSmoothingQuality = 'high';
+        cx.drawImage(this.engine.bg96, 0, 0, wm.size, wm.size);
+        const data = cx.getImageData(0, 0, wm.size, wm.size).data;
+
+        for (let row = 0; row < wm.size; row++) {
+            for (let col = 0; col < wm.size; col++) {
+                const ri = (offY + row) * roi.width + (offX + col);
+                if (ri < 0 || ri >= count) continue;
+                const o = (row * wm.size + col) * 4;
+                alphaMap[ri] = Math.max(data[o], data[o + 1], data[o + 2]) / 255;
+            }
+        }
+        return alphaMap;
     }
 }
