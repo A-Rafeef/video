@@ -31,8 +31,8 @@ const tab = ref('image'); // 'image' | 'video'
       <p
         class="text-slate-500 dark:text-slate-400 max-w-xl mx-auto font-medium text-base md:text-lg mb-6"
       >
-        Remove the visible ✨ sparkle watermark from Google Gemini AI
-        <strong>images</strong> and the new Gemini <strong>Veo videos</strong>.
+        Remove the visible ✦ sparkle watermark from Google Gemini AI
+        <strong>images</strong> and <strong>Veo videos</strong>.
         <span class="text-brand-primary dark:text-brand-secondary font-semibold"
           >Free, fast, lossless &amp; private.</span
         >
