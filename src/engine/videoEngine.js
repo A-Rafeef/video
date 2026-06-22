@@ -127,7 +127,9 @@ export class VideoWatermarkEngine {
             if (audioTrack) {
                 const audioCodec = await audioTrack.getCodec();
                 audioDecoderConfig = await audioTrack.getDecoderConfig().catch(() => null);
-                if (audioCodec) {
+                // Only carry audio if we have a codec AND a decoder config —
+                // mediabunny asserts on the first packet without one.
+                if (audioCodec && audioDecoderConfig) {
                     audioSource = new EncodedAudioPacketSource(audioCodec);
                     output.addAudioTrack(audioSource);
                 }
@@ -139,14 +141,23 @@ export class VideoWatermarkEngine {
         await output.start();
 
         // --- Process every video frame ---
+        // mediabunny requires timestamps to start at 0 and be strictly
+        // increasing, so normalise against the first frame's timestamp.
         const fallbackDur = frameRate > 0 ? 1 / frameRate : 1 / 30;
         const sink = new VideoSampleSink(videoTrack);
+        let firstTimestamp = null;
+        let lastTimestamp = -1;
         for await (const sample of sink.samples()) {
-            const timestamp = Math.max(0, sample.timestamp);
+            if (firstTimestamp === null) firstTimestamp = sample.timestamp;
+
+            let timestamp = sample.timestamp - firstTimestamp;
+            if (!(timestamp >= 0)) timestamp = 0;
+            if (timestamp <= lastTimestamp) timestamp = lastTimestamp + fallbackDur;
             const dur =
                 Number.isFinite(sample.duration) && sample.duration > 0
                     ? sample.duration
                     : fallbackDur;
+            lastTimestamp = timestamp;
 
             sample.draw(ctx, 0, 0, width, height);
             sample.close();
@@ -161,12 +172,22 @@ export class VideoWatermarkEngine {
         }
         videoSource.close();
 
-        // --- Copy audio packets through ---
+        // --- Copy audio packets through (aligned to the same time origin) ---
         if (audioSource) {
             try {
+                const offset = firstTimestamp ?? 0;
                 const aSink = new EncodedPacketSink(audioTrack);
                 for await (const packet of aSink.packets()) {
-                    await audioSource.add(packet, {
+                    let outPacket = packet;
+                    if (offset > 0) {
+                        const newTs = packet.timestamp - offset;
+                        if (newTs < 0) continue;
+                        outPacket =
+                            typeof packet.clone === 'function'
+                                ? packet.clone({ timestamp: newTs })
+                                : packet;
+                    }
+                    await audioSource.add(outPacket, {
                         decoderConfig: audioDecoderConfig ?? undefined,
                     });
                 }
