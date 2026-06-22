@@ -280,22 +280,39 @@ export class VideoWatermarkEngine {
             if (sampled >= MAX_SAMPLES) break;
         }
 
-        // Convert the brightness floor into an alpha map. A watermark pixel sits
-        // at >= alpha*255, so alpha ≈ minBrightness / 255. The hard part is
-        // telling the bright watermark apart from a static-but-not-dark corner
-        // (e.g. a stone floor) — otherwise the whole corner gets darkened.
-        // We separate the two clusters with an adaptive Otsu threshold on the
-        // brightness floor, keeping only the genuinely watermark-bright pixels.
-        const NOISE_FLOOR = 3 / 255;
-        let thr = this._otsu(minMax, count);            // 0..255
-        thr = Math.min(Math.max(thr, 0.30 * 255), 0.85 * 255);
+        // Turn the brightness floor into an alpha map via LOCAL BACKGROUND
+        // SUBTRACTION. A watermark only adds brightness on top of the content,
+        // so at each pixel:  floor = alpha*255 + (1-alpha)*localBackground.
+        // Solving for alpha:  alpha = (floor - bg) / (255 - bg).
+        // Static background ⇒ floor ≈ bg ⇒ alpha ≈ 0 (no corner shadow), while
+        // the watermark — core AND faint edges — rises above its local
+        // background and is recovered cleanly (no dark ghost).
+        const W = roi.width;
+        const H = roi.height;
 
+        // Robust background level (30th percentile of the floor), used to mask
+        // out likely-watermark pixels so they don't inflate the local estimate.
+        const bg0 = this._percentile(minMax, count, 0.30);
+        const bgField = new Float32Array(count);
+        for (let i = 0; i < count; i++) {
+            bgField[i] = minMax[i] > bg0 + 18 ? bg0 : minMax[i];
+        }
+        // Smooth, gradient-aware local background.
+        const radius = Math.max(8, Math.round(this.getVeoWatermark(width, height).size * 0.9));
+        const background = this._boxBlur(bgField, W, H, radius);
+
+        const NOISE = 6; // brightness units; ignore sub-noise excess
+        const MAX_ALPHA = 0.99;
         const alphaMap = new Float32Array(count);
         let active = 0;
         for (let i = 0; i < count; i++) {
-            if (minMax[i] < thr) { alphaMap[i] = 0; continue; }
-            const a = minMax[i] / 255 - NOISE_FLOOR;
-            if (a <= 0) { alphaMap[i] = 0; continue; }
+            const bg = background[i];
+            const excess = minMax[i] - bg - NOISE;
+            if (excess <= 0) continue;
+            const denom = 255 - bg;
+            if (denom <= 1) continue;
+            const a = Math.min(excess / denom, MAX_ALPHA);
+            if (a <= 0) continue;
             alphaMap[i] = a;
             active++;
         }
@@ -309,31 +326,47 @@ export class VideoWatermarkEngine {
         return alphaMap;
     }
 
-    /** Otsu's method: returns the 0..255 threshold splitting two brightness clusters. */
-    _otsu(values, count) {
+    /** Returns the value at percentile p (0..1) of a 0..255 array. */
+    _percentile(values, count, p) {
         const hist = new Float64Array(256);
         for (let i = 0; i < count; i++) hist[values[i] | 0]++;
-
-        let total = 0;
-        let sum = 0;
-        for (let t = 0; t < 256; t++) { total += hist[t]; sum += t * hist[t]; }
-
-        let sumB = 0;
-        let wB = 0;
-        let maxBetween = 0;
-        let threshold = 0;
+        const target = p * count;
+        let acc = 0;
         for (let t = 0; t < 256; t++) {
-            wB += hist[t];
-            if (wB === 0) continue;
-            const wF = total - wB;
-            if (wF === 0) break;
-            sumB += t * hist[t];
-            const mB = sumB / wB;
-            const mF = (sum - sumB) / wF;
-            const between = wB * wF * (mB - mF) * (mB - mF);
-            if (between > maxBetween) { maxBetween = between; threshold = t; }
+            acc += hist[t];
+            if (acc >= target) return t;
         }
-        return threshold;
+        return 255;
+    }
+
+    /** Separable box blur over a W×H Float32 field (edge-clamped average). */
+    _boxBlur(src, W, H, radius) {
+        const tmp = new Float32Array(W * H);
+        const out = new Float32Array(W * H);
+        // Horizontal pass
+        for (let y = 0; y < H; y++) {
+            const row = y * W;
+            for (let x = 0; x < W; x++) {
+                let sum = 0;
+                let n = 0;
+                const a = Math.max(0, x - radius);
+                const b = Math.min(W - 1, x + radius);
+                for (let k = a; k <= b; k++) { sum += src[row + k]; n++; }
+                tmp[row + x] = sum / n;
+            }
+        }
+        // Vertical pass
+        for (let x = 0; x < W; x++) {
+            for (let y = 0; y < H; y++) {
+                let sum = 0;
+                let n = 0;
+                const a = Math.max(0, y - radius);
+                const b = Math.min(H - 1, y + radius);
+                for (let k = a; k <= b; k++) { sum += tmp[k * W + x]; n++; }
+                out[y * W + x] = sum / n;
+            }
+        }
+        return out;
     }
 
     /** Template fallback: scaled Gemini sparkle alpha placed within the ROI. */
