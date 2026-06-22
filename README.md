@@ -96,8 +96,6 @@ gemini-watermark-remover/
     └── css/output.css      # Tailwind build for the static pages (generated)
 ```
 
-> **Before/After showcase:** the homepage slider expects `public/assets/before.png`
-> and `public/assets/after.png`. If they're missing the showcase hides itself gracefully.
 
 ## 🛠️ Tech Stack
 
@@ -124,10 +122,6 @@ npm run dev
 npm run build      # builds css/output.css + Vite app into /dist
 ```
 
-> **Cloudflare Pages setting change:** set the **build command** to `npm run build`
-> and the **output directory** to `dist` (previously the repo root). The old
-> `_headers` file was removed — Cloudflare's defaults already cache Vite's hashed
-> assets immutably while revalidating HTML.
 
 ## ⚠️ Disclaimer
 
