@@ -1,5 +1,7 @@
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, reactive, computed } from 'vue';
+import WatermarkTuner from './WatermarkTuner.vue';
+import { cleanFrame } from '../engine/tuner.js';
 
 // Engine is lazy-loaded only when the user uploads an image.
 let enginePromise = null;
@@ -18,6 +20,17 @@ const items = ref([]); // { name, displayName, status, originalSrc, url, blob, w
 
 const doneItems = computed(() => items.value.filter((i) => i.status === 'done'));
 const hasResults = computed(() => items.value.length > 0);
+
+// Advanced "tune-it-yourself" mode (off = default lossless auto removal)
+const advanced = ref(false);
+const IMG_DEFAULTS = { gain: 1, offsetX: 0, offsetY: 0, sizeScale: 1 };
+const tunerActive = ref(false);
+const tunerFrame = ref(null); // { width, height, imageData }
+const tunerBase = ref(null);
+const tunerBgImg = ref(null);
+const tunerName = ref('clean_image.png');
+const tunerOrigSrc = ref('');
+const tunerSettings = reactive({ ...IMG_DEFAULTS });
 
 function openPicker() {
   fileInput.value?.click();
@@ -43,6 +56,11 @@ async function handleFiles(fileList) {
     engine = await getEngine();
   } catch {
     alert('Error: watermark assets could not be loaded.');
+    return;
+  }
+
+  if (advanced.value) {
+    await startTuner(valid[0], engine);
     return;
   }
 
@@ -98,12 +116,70 @@ async function downloadAll() {
   setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
+// ── Advanced tuner ──────────────────────────────────────────────
+function loadImageData(file) {
+  return new Promise((resolve, reject) => {
+    const url = URL.createObjectURL(file);
+    const img = new Image();
+    img.onload = () => {
+      const w = img.naturalWidth, h = img.naturalHeight;
+      const c = document.createElement('canvas');
+      c.width = w; c.height = h;
+      const cx = c.getContext('2d', { willReadFrequently: true });
+      cx.drawImage(img, 0, 0);
+      resolve({ width: w, height: h, imageData: cx.getImageData(0, 0, w, h), src: url });
+    };
+    img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('Could not read image')); };
+    img.src = url;
+  });
+}
+
+async function startTuner(file, engine) {
+  try {
+    const f = await loadImageData(file);
+    tunerOrigSrc.value = f.src;
+    tunerFrame.value = { width: f.width, height: f.height, imageData: f.imageData };
+    tunerBase.value = engine.getWatermarkInfo(f.width, f.height);
+    tunerBgImg.value = engine.bg96;
+    tunerName.value = `clean_${file.name.replace(/\.[^/.]+$/, '')}.png`;
+    Object.assign(tunerSettings, IMG_DEFAULTS);
+    tunerActive.value = true;
+  } catch (e) {
+    console.error(e);
+    alert('Could not read this image.');
+  }
+}
+
+function resetTunerSettings() {
+  Object.assign(tunerSettings, IMG_DEFAULTS);
+}
+
+async function downloadTuner() {
+  const { width, height, imageData } = tunerFrame.value;
+  const copy = new ImageData(new Uint8ClampedArray(imageData.data), width, height);
+  cleanFrame(tunerBgImg.value, copy, width, height, tunerBase.value, { ...tunerSettings });
+  const c = document.createElement('canvas');
+  c.width = width; c.height = height;
+  c.getContext('2d').putImageData(copy, 0, 0);
+  const blob = await new Promise((r) => c.toBlob(r, 'image/png'));
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = tunerName.value;
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
 function reset() {
   items.value.forEach((i) => {
     if (i.url) URL.revokeObjectURL(i.url);
     if (i.originalSrc) URL.revokeObjectURL(i.originalSrc);
   });
   items.value = [];
+  if (tunerOrigSrc.value) URL.revokeObjectURL(tunerOrigSrc.value);
+  tunerOrigSrc.value = '';
+  tunerActive.value = false;
+  tunerFrame.value = null;
   if (fileInput.value) fileInput.value.value = '';
 }
 </script>
@@ -112,9 +188,39 @@ function reset() {
   <div
     class="max-w-5xl mx-auto bg-white dark:bg-theme-cardDark rounded-3xl shadow-xl dark:shadow-none p-4 border border-gray-100 dark:border-gray-800 relative z-10 transition-colors"
   >
+    <!-- Advanced tuner -->
+    <div v-if="tunerActive" class="animate-fade-in">
+      <div class="flex flex-col lg:flex-row gap-6">
+        <div class="flex-1 min-w-0">
+          <WatermarkTuner :settings="tunerSettings" :frame="tunerFrame" :bg-img="tunerBgImg" :base="tunerBase" />
+          <p class="text-xs text-slate-400 dark:text-slate-500 mt-3 leading-relaxed">
+            Drag the sliders until the watermark disappears in the zoomed corner. The
+            <span class="text-brand-primary font-semibold">blue box</span> shows what gets cleaned.
+          </p>
+        </div>
+        <div class="w-full lg:w-60 flex-shrink-0">
+          <div class="bg-white dark:bg-theme-cardDark rounded-2xl shadow-lg border border-gray-100 dark:border-gray-800 p-5 space-y-3 sticky top-24">
+            <h2 class="font-bold text-slate-900 dark:text-white text-base">Export</h2>
+            <button @click="resetTunerSettings" class="w-full text-xs font-semibold text-slate-500 hover:text-brand-primary transition-colors">
+              Reset sliders to default
+            </button>
+            <button @click="downloadTuner" class="group w-full py-3 relative overflow-hidden rounded-xl font-bold text-white shadow-lg shadow-brand-primary/30 transition-all">
+              <div class="absolute inset-0 bg-gradient-to-r from-brand-primary via-brand-secondary to-brand-accent group-hover:scale-110 transition-transform duration-500"></div>
+              <div class="relative flex items-center justify-center gap-2">
+                <iconify-icon icon="ph:download-simple-bold" width="18"></iconify-icon> Download PNG
+              </div>
+            </button>
+            <button @click="reset" class="w-full py-2.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-slate-600 dark:text-slate-300 hover:border-brand-primary hover:text-brand-primary rounded-xl font-bold transition-all">
+              Choose another image
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- Upload area -->
     <div
-      v-if="!hasResults"
+      v-else-if="!hasResults"
       class="group relative flex flex-col items-center justify-center w-full h-56 border-2 border-dashed rounded-2xl bg-gray-50/50 dark:bg-gray-800/50 transition-all cursor-pointer"
       :class="
         dragOver
@@ -147,6 +253,10 @@ function reset() {
           Click to upload or drag images
         </p>
         <p class="text-sm text-slate-400 dark:text-slate-500">PNG, JPG, WebP · Multiple files supported</p>
+        <label class="mt-4 inline-flex items-center gap-2 text-xs font-semibold text-slate-500 dark:text-slate-400 cursor-pointer" @click.stop>
+          <input type="checkbox" v-model="advanced" class="accent-brand-primary w-3.5 h-3.5" />
+          Advanced: tune it yourself
+        </label>
       </div>
       <input
         ref="fileInput"

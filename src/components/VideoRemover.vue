@@ -1,5 +1,6 @@
 <script setup>
-import { ref, reactive, onMounted, watch, nextTick } from 'vue';
+import { ref, reactive, onMounted } from 'vue';
+import WatermarkTuner from './WatermarkTuner.vue';
 
 let enginePromise = null;
 function getEngine() {
@@ -22,16 +23,19 @@ const originalUrl = ref('');
 const resultUrl = ref('');
 const downloadName = ref('clean_video.mp4');
 
-// Manual controls
-const settings = reactive({ gain: 1.5, offsetX: 0, offsetY: 0, sizeScale: 1 });
+// Advanced "tune-it-yourself" mode (off = one-click auto removal)
+const advanced = ref(false);
+
+// Defaults that make the Veo watermark effectively invisible.
+const DEFAULTS = { gain: 0.6, offsetX: -24, offsetY: -24, sizeScale: 1 };
+const settings = reactive({ ...DEFAULTS });
 
 // Preview state
-const mainCanvas = ref(null);
-const zoomCanvas = ref(null);
+const frame = ref(null); // { width, height, imageData }
+const base = ref(null);
+const bgImg = ref(null);
 let engine = null;
 let currentFile = null;
-let frame = null; // { width, height, imageData }
-let offscreen = null;
 
 onMounted(async () => {
   const { VideoWatermarkEngine } = await import('../engine/videoEngine.js');
@@ -51,13 +55,15 @@ async function handleFiles(fileList) {
 
   try {
     engine = await getEngine();
-    frame = await grabPreviewFrame(file);
-    offscreen = document.createElement('canvas');
-    offscreen.width = frame.width;
-    offscreen.height = frame.height;
+    if (!advanced.value) {
+      await runExport(); // one-click with proven defaults
+      return;
+    }
+    const f = await grabPreviewFrame(file);
+    frame.value = f;
+    base.value = engine.getVeoWatermark(f.width, f.height);
+    bgImg.value = engine.sparkleImage;
     status.value = 'preview';
-    await nextTick();
-    renderPreview();
   } catch (e) {
     console.error(e);
     fail(e?.message || 'Could not read this video.');
@@ -96,53 +102,8 @@ function grabPreviewFrame(file) {
   });
 }
 
-function renderPreview() {
-  if (!frame || !engine || status.value !== 'preview') return;
-  const { width, height, imageData } = frame;
-
-  // Clean a fresh copy of the original frame with the current settings.
-  const copy = new ImageData(new Uint8ClampedArray(imageData.data), width, height);
-  const { wm, roi } = engine.previewClean(copy, width, height, { ...settings });
-
-  const octx = offscreen.getContext('2d');
-  octx.putImageData(copy, 0, 0);
-
-  // Main canvas — fit the frame, draw the watermark-box guide.
-  const main = mainCanvas.value;
-  if (main) {
-    const maxW = 360;
-    const scale = Math.min(1, maxW / width);
-    main.width = Math.round(width * scale);
-    main.height = Math.round(height * scale);
-    const mctx = main.getContext('2d');
-    mctx.drawImage(offscreen, 0, 0, main.width, main.height);
-    mctx.strokeStyle = '#6366f1';
-    mctx.lineWidth = 2;
-    mctx.strokeRect(wm.x * scale, wm.y * scale, wm.width * scale, wm.height * scale);
-  }
-
-  // Zoom canvas — magnified corner so fine nudges are visible.
-  const zoom = zoomCanvas.value;
-  if (zoom) {
-    const zctx = zoom.getContext('2d');
-    zctx.imageSmoothingEnabled = false;
-    zctx.clearRect(0, 0, zoom.width, zoom.height);
-    zctx.drawImage(offscreen, roi.x, roi.y, roi.width, roi.height, 0, 0, zoom.width, zoom.height);
-    const sx = zoom.width / roi.width;
-    const sy = zoom.height / roi.height;
-    zctx.strokeStyle = '#22c55e';
-    zctx.lineWidth = 2;
-    zctx.strokeRect((wm.x - roi.x) * sx, (wm.y - roi.y) * sy, wm.width * sx, wm.height * sy);
-  }
-}
-
-watch(settings, () => renderPreview());
-
 function resetSettings() {
-  settings.gain = 1.5;
-  settings.offsetX = 0;
-  settings.offsetY = 0;
-  settings.sizeScale = 1;
+  Object.assign(settings, DEFAULTS);
 }
 
 async function runExport() {
@@ -170,7 +131,6 @@ function backToPreview() {
   resultUrl.value = '';
   originalUrl.value = '';
   status.value = 'preview';
-  nextTick(renderPreview);
 }
 
 function download() {
@@ -191,7 +151,7 @@ function reset() {
   progress.value = 0;
   status.value = 'idle';
   currentFile = null;
-  frame = null;
+  frame.value = null;
   if (fileInput.value) fileInput.value.value = '';
 }
 </script>
@@ -228,6 +188,10 @@ function reset() {
           Click to upload or drag a Gemini Veo video
         </p>
         <p class="text-sm text-slate-400 dark:text-slate-500">MP4, WebM, MOV · Audio is preserved</p>
+        <label class="mt-4 inline-flex items-center gap-2 text-xs font-semibold text-slate-500 dark:text-slate-400 cursor-pointer" @click.stop>
+          <input type="checkbox" v-model="advanced" class="accent-brand-primary w-3.5 h-3.5" />
+          Advanced: tune it yourself
+        </label>
       </div>
       <input ref="fileInput" type="file" accept="video/*" class="hidden" aria-label="Video file input" @change="onChange" />
     </div>
@@ -241,65 +205,21 @@ function reset() {
     <!-- Preview + manual controls -->
     <div v-else-if="status === 'preview'" class="animate-fade-in">
       <div class="flex flex-col lg:flex-row gap-6">
-        <!-- Preview -->
         <div class="flex-1 min-w-0">
-          <div class="flex flex-col sm:flex-row gap-4 items-start">
-            <div class="flex flex-col items-center">
-              <span class="text-xs font-bold text-slate-500 dark:text-slate-400 mb-1.5">Preview</span>
-              <canvas ref="mainCanvas" class="rounded-xl border border-gray-200 dark:border-gray-700 max-w-full bg-black/5"></canvas>
-            </div>
-            <div class="flex flex-col items-center">
-              <span class="text-xs font-bold text-slate-500 dark:text-slate-400 mb-1.5">Corner (zoomed)</span>
-              <canvas ref="zoomCanvas" width="200" height="200" class="rounded-xl border border-gray-200 dark:border-gray-700 bg-black/5" style="image-rendering: pixelated"></canvas>
-            </div>
-          </div>
+          <WatermarkTuner :settings="settings" :frame="frame" :bg-img="bgImg" :base="base" />
           <p class="text-xs text-slate-400 dark:text-slate-500 mt-3 leading-relaxed">
             Adjust the sliders until the watermark disappears in the zoomed corner. The
             <span class="text-brand-primary font-semibold">blue box</span> shows what gets cleaned.
           </p>
         </div>
 
-        <!-- Controls -->
-        <div class="w-full lg:w-72 flex-shrink-0">
-          <div class="bg-white dark:bg-theme-cardDark rounded-2xl shadow-lg border border-gray-100 dark:border-gray-800 p-5 space-y-4">
-            <h2 class="font-bold text-slate-900 dark:text-white text-base">Adjust removal</h2>
-
-            <label class="block">
-              <div class="flex justify-between text-xs font-bold text-slate-600 dark:text-slate-300 mb-1">
-                <span>Strength</span><span>{{ settings.gain.toFixed(2) }}×</span>
-              </div>
-              <input type="range" min="0.3" max="3" step="0.05" v-model.number="settings.gain" class="w-full accent-brand-primary" />
-            </label>
-
-            <label class="block">
-              <div class="flex justify-between text-xs font-bold text-slate-600 dark:text-slate-300 mb-1">
-                <span>Position X</span><span>{{ settings.offsetX }}px</span>
-              </div>
-              <input type="range" min="-120" max="120" step="1" v-model.number="settings.offsetX" class="w-full accent-brand-primary" />
-            </label>
-
-            <label class="block">
-              <div class="flex justify-between text-xs font-bold text-slate-600 dark:text-slate-300 mb-1">
-                <span>Position Y</span><span>{{ settings.offsetY }}px</span>
-              </div>
-              <input type="range" min="-120" max="120" step="1" v-model.number="settings.offsetY" class="w-full accent-brand-primary" />
-            </label>
-
-            <label class="block">
-              <div class="flex justify-between text-xs font-bold text-slate-600 dark:text-slate-300 mb-1">
-                <span>Size</span><span>{{ settings.sizeScale.toFixed(2) }}×</span>
-              </div>
-              <input type="range" min="0.5" max="2" step="0.05" v-model.number="settings.sizeScale" class="w-full accent-brand-primary" />
-            </label>
-
+        <div class="w-full lg:w-60 flex-shrink-0">
+          <div class="bg-white dark:bg-theme-cardDark rounded-2xl shadow-lg border border-gray-100 dark:border-gray-800 p-5 space-y-3 sticky top-24">
+            <h2 class="font-bold text-slate-900 dark:text-white text-base">Export</h2>
             <button @click="resetSettings" class="w-full text-xs font-semibold text-slate-500 hover:text-brand-primary transition-colors">
-              Reset sliders
+              Reset sliders to default
             </button>
-
-            <button
-              @click="runExport"
-              class="group w-full py-3 relative overflow-hidden rounded-xl font-bold text-white shadow-lg shadow-brand-primary/30 transition-all"
-            >
+            <button @click="runExport" class="group w-full py-3 relative overflow-hidden rounded-xl font-bold text-white shadow-lg shadow-brand-primary/30 transition-all">
               <div class="absolute inset-0 bg-gradient-to-r from-brand-primary via-brand-secondary to-brand-accent group-hover:scale-110 transition-transform duration-500"></div>
               <div class="relative flex items-center justify-center gap-2">
                 <iconify-icon icon="ph:sparkle-fill" width="18"></iconify-icon> Remove &amp; Export
@@ -362,7 +282,7 @@ function reset() {
                 <iconify-icon icon="ph:download-simple-bold" width="20"></iconify-icon> Download
               </div>
             </button>
-            <button @click="backToPreview" class="w-full py-3 mb-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-slate-600 dark:text-slate-300 hover:border-brand-primary hover:text-brand-primary rounded-xl font-bold transition-all">
+            <button v-if="advanced" @click="backToPreview" class="w-full py-3 mb-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-slate-600 dark:text-slate-300 hover:border-brand-primary hover:text-brand-primary rounded-xl font-bold transition-all">
               Adjust &amp; re-run
             </button>
             <button @click="reset" class="w-full py-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-slate-600 dark:text-slate-300 hover:border-brand-primary hover:text-brand-primary rounded-xl font-bold transition-all">

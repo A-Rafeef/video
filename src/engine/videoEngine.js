@@ -1,5 +1,9 @@
 import { WatermarkEngine } from './watermarkEngine.js';
 import { removeWatermark } from './blendModes.js';
+import { resolveBox, getRoi, buildAlpha, cleanFrame } from './tuner.js';
+
+// Defaults that, in practice, make the Veo watermark effectively invisible.
+export const VIDEO_DEFAULTS = { gain: 0.6, offsetX: -24, offsetY: -24, sizeScale: 1 };
 
 /**
  * Client-side Gemini Veo video watermark remover.
@@ -34,6 +38,11 @@ export class VideoWatermarkEngine {
         return this._mb;
     }
 
+    /** The Gemini sparkle reference image, for the tuner preview. */
+    get sparkleImage() {
+        return this.engine.bg96;
+    }
+
     /** Default Veo watermark box (bottom-right): size ≈ shortSide/15, margin ≈ shortSide/10. */
     getVeoWatermark(width, height) {
         const base = Math.min(width, height);
@@ -48,65 +57,16 @@ export class VideoWatermarkEngine {
         };
     }
 
-    /** Apply the user's manual offset/size tweaks to the default box. */
-    resolveBox(width, height, opts = {}) {
-        const base = this.getVeoWatermark(width, height);
-        const sizeScale = opts.sizeScale || 1;
-        const size = Math.max(8, Math.min(Math.round(base.size * sizeScale), Math.min(width, height)));
-        const x = Math.max(0, Math.min(base.x + Math.round(opts.offsetX || 0), width - size));
-        const y = Math.max(0, Math.min(base.y + Math.round(opts.offsetY || 0), height - size));
-        return { size, x, y, width: size, height: size };
-    }
-
-    /** Padded region of interest that always contains the watermark box. */
-    getRoi(width, height, wm) {
-        const pad = Math.round(wm.size * 0.6);
-        const rx = Math.max(0, wm.x - pad);
-        const ry = Math.max(0, wm.y - pad);
-        const rw = Math.min(width - rx, wm.width + pad * 2);
-        const rh = Math.min(height - ry, wm.height + pad * 2);
-        return { x: rx, y: ry, width: rw, height: rh };
-    }
-
-    /** Scaled Gemini sparkle alpha (template shape) placed inside the ROI, scaled by gain. */
-    buildAlpha(roi, wm, gain) {
-        const count = roi.width * roi.height;
-        const alphaMap = new Float32Array(count);
-        const offX = wm.x - roi.x;
-        const offY = wm.y - roi.y;
-
-        const c = document.createElement('canvas');
-        c.width = wm.size; c.height = wm.size;
-        const cx = c.getContext('2d', { willReadFrequently: true });
-        cx.imageSmoothingEnabled = true;
-        cx.imageSmoothingQuality = 'high';
-        cx.drawImage(this.engine.bg96, 0, 0, wm.size, wm.size);
-        const data = cx.getImageData(0, 0, wm.size, wm.size).data;
-
-        for (let row = 0; row < wm.size; row++) {
-            for (let col = 0; col < wm.size; col++) {
-                const ri = (offY + row) * roi.width + (offX + col);
-                if (ri < 0 || ri >= count) continue;
-                const o = (row * wm.size + col) * 4;
-                const a = (Math.max(data[o], data[o + 1], data[o + 2]) / 255) * gain;
-                alphaMap[ri] = a > 0 ? Math.min(a, 0.99) : 0;
-            }
-        }
-        return alphaMap;
-    }
-
     /**
      * Clean a single full-frame ImageData in place (used for the live preview).
      * Returns the resolved watermark box + ROI so the UI can draw guides.
      */
     previewClean(fullImageData, width, height, opts = {}) {
-        const wm = this.resolveBox(width, height, opts);
-        const roi = this.getRoi(width, height, wm);
-        const alpha = this.buildAlpha(roi, wm, opts.gain ?? 1.5);
-        removeWatermark(fullImageData, alpha, {
-            x: roi.x, y: roi.y, width: roi.width, height: roi.height,
+        const base = this.getVeoWatermark(width, height);
+        return cleanFrame(this.engine.bg96, fullImageData, width, height, base, {
+            ...opts,
+            gain: opts.gain ?? VIDEO_DEFAULTS.gain,
         });
-        return { wm, roi };
     }
 
     /**
@@ -116,7 +76,7 @@ export class VideoWatermarkEngine {
      */
     async process(file, opts = {}) {
         const onProgress = opts.onProgress || (() => {});
-        const gain = opts.gain ?? 1.5;
+        const gain = opts.gain ?? VIDEO_DEFAULTS.gain;
 
         const mb = await this._lib();
         const {
@@ -151,9 +111,10 @@ export class VideoWatermarkEngine {
             if (stats?.averagePacketRate) frameRate = Math.round(stats.averagePacketRate);
         } catch { /* keep default */ }
 
-        const wm = this.resolveBox(width, height, opts);
-        const roi = this.getRoi(width, height, wm);
-        const alpha = this.buildAlpha(roi, wm, gain);
+        const base = this.getVeoWatermark(width, height);
+        const wm = resolveBox(base, width, height, opts);
+        const roi = getRoi(width, height, wm);
+        const alpha = buildAlpha(this.engine.bg96, roi, wm, gain);
         const region = { x: 0, y: 0, width: roi.width, height: roi.height };
 
         const canvas =
