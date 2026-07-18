@@ -47,6 +47,7 @@
         <a href="/about.html" class="hover:text-brand-primary dark:hover:text-white transition-colors">About</a>
         <a href="/contact.html" class="hover:text-brand-primary dark:hover:text-white transition-colors">Contact</a>
         <a href="/blog/" class="hover:text-brand-primary dark:hover:text-white transition-colors">Blog</a>
+        <a href="/donate/" class="hover:text-brand-primary dark:hover:text-white transition-colors">Donate</a>
       </nav>
 
       <p class="text-xs text-slate-400 dark:text-slate-600 mt-6">
