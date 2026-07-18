@@ -264,7 +264,7 @@ function reset() {
     <!-- Upload area -->
     <div
       v-else-if="!hasResults"
-      class="group relative flex flex-col items-center justify-center w-full h-56 border-2 border-dashed rounded-2xl bg-gray-50/50 dark:bg-gray-800/50 transition-all cursor-pointer"
+      class="group relative flex flex-col items-center justify-center w-full min-h-[14rem] py-8 border-2 border-dashed rounded-2xl bg-gray-50/50 dark:bg-gray-800/50 transition-all cursor-pointer"
       :class="
         dragOver
           ? 'border-brand-primary bg-indigo-50/60 dark:bg-gray-800'
