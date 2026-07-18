@@ -46,8 +46,9 @@ function dismiss() {
       </div>
 
       <p class="text-white/70 text-xs mb-4 leading-relaxed">
-        This tool is 100% free. If it saved you time, consider buying me a coffee on
-        <b>Patreon</b> — it helps cover maintenance costs and future features!
+        This tool is 100% free. If it saved you time, consider buying me a coffee via
+        <b>Patreon</b> or a quick <b>UPI</b> donation — it helps cover maintenance
+        costs and future features!
       </p>
 
       <a
@@ -59,6 +60,15 @@ function dismiss() {
       >
         <iconify-icon icon="simple-icons:patreon" width="16" aria-hidden="true"></iconify-icon>
         Support on Patreon
+      </a>
+
+      <a
+        href="/donate/"
+        class="mt-2 flex items-center justify-center gap-2 w-full py-2.5 rounded-xl font-bold text-sm text-white transition-transform hover:scale-105 active:scale-95"
+        style="background: #097939"
+      >
+        <iconify-icon icon="ph:hand-heart-fill" width="16" aria-hidden="true"></iconify-icon>
+        Donate via UPI (India)
       </a>
 
       <button

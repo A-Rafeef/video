@@ -75,6 +75,15 @@ function toggleMenu() {
             <iconify-icon icon="simple-icons:patreon" width="22"></iconify-icon>
             <span>Patreon</span>
           </a>
+          <a
+            href="/donate/"
+            class="text-slate-600 dark:text-slate-400 hover-upi transition-colors flex items-center gap-1 font-semibold text-sm md:text-base"
+            aria-label="Donate via UPI"
+            title="Donate via UPI"
+          >
+            <iconify-icon icon="ph:hand-heart-bold" width="24"></iconify-icon>
+            <span>UPI</span>
+          </a>
         </nav>
       </div>
 
@@ -119,6 +128,14 @@ function toggleMenu() {
       >
         <iconify-icon icon="simple-icons:patreon" width="22"></iconify-icon>
         <span>Patreon</span>
+      </a>
+
+      <a
+        href="/donate/"
+        class="flex items-center gap-3 p-2 rounded-md text-slate-600 dark:text-slate-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors font-semibold"
+      >
+        <iconify-icon icon="ph:hand-heart-bold" width="24"></iconify-icon>
+        <span>Donate via UPI</span>
       </a>
     </div>
   </header>
