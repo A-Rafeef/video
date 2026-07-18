@@ -13,7 +13,7 @@ const tab = ref('image'); // 'image' | 'video'
 
 <template>
   <SiteHeader />
-  <NotificationBanner v-if="false" />
+  <NotificationBanner />
 
   <main class="flex-grow w-full">
     <section class="py-10 md:py-14 text-center px-4" aria-labelledby="hero-heading">
