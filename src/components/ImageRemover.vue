@@ -1,5 +1,5 @@
 <script setup>
-import { ref, reactive, computed } from 'vue';
+import { ref, reactive, computed, watch } from 'vue';
 import WatermarkTuner from './WatermarkTuner.vue';
 import { cleanFrame } from '../engine/tuner.js';
 
@@ -23,15 +23,36 @@ const hasResults = computed(() => items.value.length > 0);
 
 // Advanced "tune-it-yourself" mode (off = default lossless auto removal)
 const advanced = ref(false);
-// Defaults matching the watermark's current position on new Gemini images.
-const IMG_DEFAULTS = { gain: 0.6, offsetX: -128, offsetY: -128, sizeScale: 1 };
+// Watermark position presets — Google has shifted the watermark between
+// generations of Gemini images. Each preset carries its own tuned settings.
+const IMG_PRESETS = [
+  {
+    id: 'new',
+    label: 'New Gemini images',
+    desc: 'Recent downloads — watermark sits about 128px inside the bottom-right corner.',
+    settings: { gain: 0.6, offsetX: -128, offsetY: -128, sizeScale: 1 },
+  },
+  {
+    id: 'classic',
+    label: 'Classic corner',
+    desc: 'Older images — watermark right in the bottom-right corner.',
+    settings: { gain: 1, offsetX: 0, offsetY: 0, sizeScale: 1 },
+  },
+];
+const presetId = ref('new');
+const currentPreset = computed(() => IMG_PRESETS.find((p) => p.id === presetId.value));
 const tunerActive = ref(false);
 const tunerFrame = ref(null); // { width, height, imageData }
 const tunerBase = ref(null);
 const tunerBgImg = ref(null);
 const tunerName = ref('clean_image.png');
 const tunerOrigSrc = ref('');
-const tunerSettings = reactive({ ...IMG_DEFAULTS });
+const tunerSettings = reactive({ ...IMG_PRESETS[0].settings });
+
+// Switching preset re-seeds the tuner sliders with that preset's settings.
+watch(presetId, () => {
+  Object.assign(tunerSettings, currentPreset.value.settings);
+});
 
 function openPicker() {
   fileInput.value?.click();
@@ -85,7 +106,7 @@ async function handleFiles(fileList) {
       // one-click flow targets the watermark's current position.
       const { width, height, imageData, src } = await loadImageData(file);
       const copy = new ImageData(new Uint8ClampedArray(imageData.data), width, height);
-      cleanFrame(engine.bg96, copy, width, height, engine.getWatermarkInfo(width, height), IMG_DEFAULTS);
+      cleanFrame(engine.bg96, copy, width, height, engine.getWatermarkInfo(width, height), currentPreset.value.settings);
 
       const c = document.createElement('canvas');
       c.width = width;
@@ -154,7 +175,7 @@ async function startTuner(file, engine) {
     tunerBase.value = engine.getWatermarkInfo(f.width, f.height);
     tunerBgImg.value = engine.bg96;
     tunerName.value = `clean_${file.name.replace(/\.[^/.]+$/, '')}.png`;
-    Object.assign(tunerSettings, IMG_DEFAULTS);
+    Object.assign(tunerSettings, currentPreset.value.settings);
     tunerActive.value = true;
   } catch (e) {
     console.error(e);
@@ -163,7 +184,7 @@ async function startTuner(file, engine) {
 }
 
 function resetTunerSettings() {
-  Object.assign(tunerSettings, IMG_DEFAULTS);
+  Object.assign(tunerSettings, currentPreset.value.settings);
 }
 
 async function downloadTuner() {
@@ -213,8 +234,18 @@ function reset() {
         <div class="w-full lg:w-60 flex-shrink-0">
           <div class="bg-white dark:bg-theme-cardDark rounded-2xl shadow-lg border border-gray-100 dark:border-gray-800 p-5 space-y-3 sticky top-24">
             <h2 class="font-bold text-slate-900 dark:text-white text-base">Export</h2>
+            <label class="block">
+              <div class="text-xs font-bold text-slate-600 dark:text-slate-300 mb-1">Position preset</div>
+              <select
+                v-model="presetId"
+                class="w-full text-xs font-semibold bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg px-2 py-1.5 text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-primary/50 cursor-pointer"
+              >
+                <option v-for="p in IMG_PRESETS" :key="p.id" :value="p.id">{{ p.label }}</option>
+              </select>
+              <p class="text-[11px] text-slate-400 dark:text-slate-500 mt-1">{{ currentPreset.desc }}</p>
+            </label>
             <button @click="resetTunerSettings" class="w-full text-xs font-semibold text-slate-500 hover:text-brand-primary transition-colors">
-              Reset sliders to default
+              Reset sliders to preset
             </button>
             <button @click="downloadTuner" class="group w-full py-3 relative overflow-hidden rounded-xl font-bold text-white shadow-lg shadow-brand-primary/30 transition-all">
               <div class="absolute inset-0 bg-gradient-to-r from-brand-primary via-brand-secondary to-brand-accent group-hover:scale-110 transition-transform duration-500"></div>
@@ -265,7 +296,19 @@ function reset() {
           Click to upload or drag images
         </p>
         <p class="text-sm text-slate-400 dark:text-slate-500">PNG, JPG, WebP · Multiple files supported</p>
-        <label class="mt-4 inline-flex items-center gap-2 text-xs font-semibold text-slate-500 dark:text-slate-400 cursor-pointer" @click.stop>
+        <div class="mt-4 flex flex-col items-center gap-1.5" @click.stop>
+          <label class="inline-flex items-center gap-2 text-xs font-semibold text-slate-500 dark:text-slate-400">
+            Watermark position:
+            <select
+              v-model="presetId"
+              class="text-xs font-semibold bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg px-2 py-1 text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-primary/50 cursor-pointer"
+            >
+              <option v-for="p in IMG_PRESETS" :key="p.id" :value="p.id">{{ p.label }}</option>
+            </select>
+          </label>
+          <p class="text-[11px] text-slate-400 dark:text-slate-500 max-w-xs">{{ currentPreset.desc }}</p>
+        </div>
+        <label class="mt-3 inline-flex items-center gap-2 text-xs font-semibold text-slate-500 dark:text-slate-400 cursor-pointer" @click.stop>
           <input type="checkbox" v-model="advanced" class="accent-brand-primary w-3.5 h-3.5" />
           Advanced: tune it yourself
         </label>

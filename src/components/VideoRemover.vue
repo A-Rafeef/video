@@ -1,5 +1,5 @@
 <script setup>
-import { ref, reactive, onMounted } from 'vue';
+import { ref, reactive, computed, watch, onMounted } from 'vue';
 import WatermarkTuner from './WatermarkTuner.vue';
 
 let enginePromise = null;
@@ -26,9 +26,29 @@ const downloadName = ref('clean_video.mp4');
 // Advanced "tune-it-yourself" mode (off = one-click auto removal)
 const advanced = ref(false);
 
-// Defaults that make the Veo watermark effectively invisible.
-const DEFAULTS = { gain: 0.6, offsetX: -24, offsetY: -24, sizeScale: 1 };
-const settings = reactive({ ...DEFAULTS });
+// Watermark position presets for Veo videos. Each carries its own tuned settings.
+const VIDEO_PRESETS = [
+  {
+    id: 'veo',
+    label: 'Veo videos (default)',
+    desc: 'Current Veo downloads — watermark slightly inset from the bottom-right corner.',
+    settings: { gain: 0.6, offsetX: -24, offsetY: -24, sizeScale: 1 },
+  },
+  {
+    id: 'corner',
+    label: 'Classic corner',
+    desc: 'Watermark right in the bottom-right corner.',
+    settings: { gain: 0.6, offsetX: 0, offsetY: 0, sizeScale: 1 },
+  },
+];
+const presetId = ref('veo');
+const currentPreset = computed(() => VIDEO_PRESETS.find((p) => p.id === presetId.value));
+const settings = reactive({ ...VIDEO_PRESETS[0].settings });
+
+// Switching preset re-seeds the sliders with that preset's settings.
+watch(presetId, () => {
+  Object.assign(settings, currentPreset.value.settings);
+});
 
 // Preview state
 const frame = ref(null); // { width, height, imageData }
@@ -103,7 +123,7 @@ function grabPreviewFrame(file) {
 }
 
 function resetSettings() {
-  Object.assign(settings, DEFAULTS);
+  Object.assign(settings, currentPreset.value.settings);
 }
 
 async function runExport() {
@@ -188,7 +208,19 @@ function reset() {
           Click to upload or drag a Gemini Veo video
         </p>
         <p class="text-sm text-slate-400 dark:text-slate-500">MP4, WebM, MOV · Audio is preserved</p>
-        <label class="mt-4 inline-flex items-center gap-2 text-xs font-semibold text-slate-500 dark:text-slate-400 cursor-pointer" @click.stop>
+        <div class="mt-4 flex flex-col items-center gap-1.5" @click.stop>
+          <label class="inline-flex items-center gap-2 text-xs font-semibold text-slate-500 dark:text-slate-400">
+            Watermark position:
+            <select
+              v-model="presetId"
+              class="text-xs font-semibold bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg px-2 py-1 text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-primary/50 cursor-pointer"
+            >
+              <option v-for="p in VIDEO_PRESETS" :key="p.id" :value="p.id">{{ p.label }}</option>
+            </select>
+          </label>
+          <p class="text-[11px] text-slate-400 dark:text-slate-500 max-w-xs">{{ currentPreset.desc }}</p>
+        </div>
+        <label class="mt-3 inline-flex items-center gap-2 text-xs font-semibold text-slate-500 dark:text-slate-400 cursor-pointer" @click.stop>
           <input type="checkbox" v-model="advanced" class="accent-brand-primary w-3.5 h-3.5" />
           Advanced: tune it yourself
         </label>
@@ -216,8 +248,18 @@ function reset() {
         <div class="w-full lg:w-60 flex-shrink-0">
           <div class="bg-white dark:bg-theme-cardDark rounded-2xl shadow-lg border border-gray-100 dark:border-gray-800 p-5 space-y-3 sticky top-24">
             <h2 class="font-bold text-slate-900 dark:text-white text-base">Export</h2>
+            <label class="block">
+              <div class="text-xs font-bold text-slate-600 dark:text-slate-300 mb-1">Position preset</div>
+              <select
+                v-model="presetId"
+                class="w-full text-xs font-semibold bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg px-2 py-1.5 text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-primary/50 cursor-pointer"
+              >
+                <option v-for="p in VIDEO_PRESETS" :key="p.id" :value="p.id">{{ p.label }}</option>
+              </select>
+              <p class="text-[11px] text-slate-400 dark:text-slate-500 mt-1">{{ currentPreset.desc }}</p>
+            </label>
             <button @click="resetSettings" class="w-full text-xs font-semibold text-slate-500 hover:text-brand-primary transition-colors">
-              Reset sliders to default
+              Reset sliders to preset
             </button>
             <button @click="runExport" class="group w-full py-3 relative overflow-hidden rounded-xl font-bold text-white shadow-lg shadow-brand-primary/30 transition-all">
               <div class="absolute inset-0 bg-gradient-to-r from-brand-primary via-brand-secondary to-brand-accent group-hover:scale-110 transition-transform duration-500"></div>
