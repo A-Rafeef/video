@@ -23,7 +23,8 @@ const hasResults = computed(() => items.value.length > 0);
 
 // Advanced "tune-it-yourself" mode (off = default lossless auto removal)
 const advanced = ref(false);
-const IMG_DEFAULTS = { gain: 1, offsetX: 0, offsetY: 0, sizeScale: 1 };
+// Defaults matching the watermark's current position on new Gemini images.
+const IMG_DEFAULTS = { gain: 0.6, offsetX: -128, offsetY: -128, sizeScale: 1 };
 const tunerActive = ref(false);
 const tunerFrame = ref(null); // { width, height, imageData }
 const tunerBase = ref(null);
@@ -80,13 +81,24 @@ async function handleFiles(fileList) {
     const item = items.value[idx];
 
     try {
-      const result = await engine.process(file);
+      // Clean with the same tuned defaults as the Advanced tuner, so the
+      // one-click flow targets the watermark's current position.
+      const { width, height, imageData, src } = await loadImageData(file);
+      const copy = new ImageData(new Uint8ClampedArray(imageData.data), width, height);
+      cleanFrame(engine.bg96, copy, width, height, engine.getWatermarkInfo(width, height), IMG_DEFAULTS);
+
+      const c = document.createElement('canvas');
+      c.width = width;
+      c.height = height;
+      c.getContext('2d').putImageData(copy, 0, 0);
+      const blob = await new Promise((r) => c.toBlob(r, 'image/png'));
+
       item.status = 'done';
-      item.originalSrc = result.originalSrc;
-      item.url = URL.createObjectURL(result.blob);
-      item.blob = result.blob;
-      item.width = result.width;
-      item.height = result.height;
+      item.originalSrc = src;
+      item.url = URL.createObjectURL(blob);
+      item.blob = blob;
+      item.width = width;
+      item.height = height;
     } catch (err) {
       console.error(err);
       item.status = 'error';
