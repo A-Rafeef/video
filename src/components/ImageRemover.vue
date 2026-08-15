@@ -2,6 +2,7 @@
 import { ref, reactive, computed, watch } from 'vue';
 import WatermarkTuner from './WatermarkTuner.vue';
 import { cleanFrame } from '../engine/tuner.js';
+import { getWatermarkInfo, getCompactWatermarkInfo } from '../engine/geometry.js';
 
 // Engine is lazy-loaded only when the user uploads an image.
 let enginePromise = null;
@@ -28,18 +29,21 @@ const advanced = ref(false);
 const IMG_PRESETS = [
   {
     id: 'compact',
+    geom: 'compact',
     label: 'Latest (small corner mark)',
     desc: 'Newest downloads — a smaller sparkle tucked into the bottom-right corner.',
-    settings: { gain: 0.6, offsetX: 0, offsetY: 0, sizeScale: 0.5 },
+    settings: { gain: 0.6, offsetX: 0, offsetY: 0, sizeScale: 1 },
   },
   {
     id: 'new',
+    geom: 'classic',
     label: 'Inset watermark',
     desc: 'Watermark sits about 128px inside the bottom-right corner.',
     settings: { gain: 0.6, offsetX: -128, offsetY: -128, sizeScale: 1 },
   },
   {
     id: 'classic',
+    geom: 'classic',
     label: 'Classic corner',
     desc: 'Older images — watermark right in the bottom-right corner.',
     settings: { gain: 1, offsetX: 0, offsetY: 0, sizeScale: 1 },
@@ -55,9 +59,19 @@ const tunerName = ref('clean_image.png');
 const tunerOrigSrc = ref('');
 const tunerSettings = reactive({ ...IMG_PRESETS[0].settings });
 
-// Switching preset re-seeds the tuner sliders with that preset's settings.
+// The watermark's base box depends on which generation of image this is.
+function baseFor(width, height) {
+  return currentPreset.value.geom === 'compact'
+    ? getCompactWatermarkInfo(width, height)
+    : getWatermarkInfo(width, height);
+}
+
+// Switching preset re-seeds the tuner sliders and the base box.
 watch(presetId, () => {
   Object.assign(tunerSettings, currentPreset.value.settings);
+  if (tunerFrame.value) {
+    tunerBase.value = baseFor(tunerFrame.value.width, tunerFrame.value.height);
+  }
 });
 
 function openPicker() {
@@ -112,7 +126,7 @@ async function handleFiles(fileList) {
       // one-click flow targets the watermark's current position.
       const { width, height, imageData, src } = await loadImageData(file);
       const copy = new ImageData(new Uint8ClampedArray(imageData.data), width, height);
-      cleanFrame(engine.bg96, copy, width, height, engine.getWatermarkInfo(width, height), currentPreset.value.settings);
+      cleanFrame(engine.bg96, copy, width, height, baseFor(width, height), currentPreset.value.settings);
 
       const c = document.createElement('canvas');
       c.width = width;
@@ -178,7 +192,7 @@ async function startTuner(file, engine) {
     const f = await loadImageData(file);
     tunerOrigSrc.value = f.src;
     tunerFrame.value = { width: f.width, height: f.height, imageData: f.imageData };
-    tunerBase.value = engine.getWatermarkInfo(f.width, f.height);
+    tunerBase.value = baseFor(f.width, f.height);
     tunerBgImg.value = engine.bg96;
     tunerName.value = `clean_${file.name.replace(/\.[^/.]+$/, '')}.png`;
     Object.assign(tunerSettings, currentPreset.value.settings);
