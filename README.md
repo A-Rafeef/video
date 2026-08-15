@@ -3,6 +3,8 @@
 [![Live Demo](https://img.shields.io/badge/demo-removewatermark.dev-success?style=flat-square&logo=cloudflare&logoColor=white)](https://removewatermark.dev)
 [![Stack](https://img.shields.io/badge/tech-Vue%20%7C%20Vite%20%7C%20Tailwind-3B82F6?style=flat-square)](https://github.com/dearabhin/gemini-watermark-remover)
 [![License](https://img.shields.io/badge/license-MIT-orange?style=flat-square)](LICENSE)
+[![Support on Patreon](https://img.shields.io/badge/Patreon-support-FF424D?style=flat-square&logo=patreon&logoColor=white)](https://www.patreon.com/cw/AbhinKrishna/membership)
+[![Donate via UPI](https://img.shields.io/badge/UPI-donate-097939?style=flat-square&logo=googlepay&logoColor=white)](https://removewatermark.dev/donate/)
 
 A high-performance, **100% client-side** tool for removing the visible Google Gemini ✦ AI sparkle watermark from both **images and videos**. Built with **Vue 3 + Vite + Tailwind CSS**, it uses a mathematically precise **Reverse Alpha Blending** algorithm to restore pixels with zero quality loss.
 
@@ -121,6 +123,24 @@ npm run dev
 This tool is for **educational and personal use only**.
 * It only removes visible watermarks; it **does not** remove invisible SynthID watermarks embedded by Google.
 * Please respect Google's Terms of Service and Intellectual Property rights.
+
+## 💖 Support This Project
+
+This tool is free, open source, and has no ads or paywalls — and it will stay that way.
+If it saved you time, a small donation helps **renew the domain**, **build new free
+open-source tools**, and occasionally buys me a **tea or a meal** ☕
+
+<p align="center">
+  <a href="https://www.patreon.com/cw/AbhinKrishna/membership">
+    <img src="https://img.shields.io/badge/Support%20on-Patreon-FF424D?style=for-the-badge&logo=patreon&logoColor=white" alt="Support on Patreon" />
+  </a>
+  &nbsp;
+  <a href="https://removewatermark.dev/donate/">
+    <img src="https://img.shields.io/badge/Donate%20via-UPI-097939?style=for-the-badge&logo=googlepay&logoColor=white" alt="Donate via UPI" />
+  </a>
+</p>
+
+> UPI donations work with Indian bank accounts (INR). Supporting from outside India? Patreon has you covered.
 
 ## 🤝 Credits
 
