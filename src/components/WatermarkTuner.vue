@@ -83,7 +83,7 @@ defineExpose({ render });
         <div class="flex justify-between text-xs font-bold text-slate-600 dark:text-slate-300 mb-1">
           <span>Size</span><span>{{ settings.sizeScale.toFixed(2) }}×</span>
         </div>
-        <input type="range" min="0.5" max="2" step="0.05" v-model.number="settings.sizeScale" class="w-full accent-brand-primary" />
+        <input type="range" min="0.2" max="2" step="0.05" v-model.number="settings.sizeScale" class="w-full accent-brand-primary" />
       </label>
       <label class="block">
         <div class="flex justify-between text-xs font-bold text-slate-600 dark:text-slate-300 mb-1">

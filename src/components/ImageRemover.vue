@@ -27,9 +27,15 @@ const advanced = ref(false);
 // generations of Gemini images. Each preset carries its own tuned settings.
 const IMG_PRESETS = [
   {
+    id: 'compact',
+    label: 'Latest (small corner mark)',
+    desc: 'Newest downloads — a smaller sparkle tucked into the bottom-right corner.',
+    settings: { gain: 0.6, offsetX: 0, offsetY: 0, sizeScale: 0.5 },
+  },
+  {
     id: 'new',
-    label: 'New Gemini images',
-    desc: 'Recent downloads — watermark sits about 128px inside the bottom-right corner.',
+    label: 'Inset watermark',
+    desc: 'Watermark sits about 128px inside the bottom-right corner.',
     settings: { gain: 0.6, offsetX: -128, offsetY: -128, sizeScale: 1 },
   },
   {
@@ -39,7 +45,7 @@ const IMG_PRESETS = [
     settings: { gain: 1, offsetX: 0, offsetY: 0, sizeScale: 1 },
   },
 ];
-const presetId = ref('new');
+const presetId = ref('compact');
 const currentPreset = computed(() => IMG_PRESETS.find((p) => p.id === presetId.value));
 const tunerActive = ref(false);
 const tunerFrame = ref(null); // { width, height, imageData }
