@@ -80,9 +80,8 @@ export class VideoWatermarkEngine {
 
         const mb = await this._lib();
         const {
-            ALL_FORMATS, BlobSource, BufferTarget, CanvasSource,
-            EncodedAudioPacketSource, EncodedPacketSink, Input,
-            Mp4OutputFormat, Output, QUALITY_HIGH, VideoSampleSink, canEncodeVideo,
+            ALL_FORMATS, BlobSource, BufferTarget, Conversion, Input,
+            Mp4OutputFormat, Output, QUALITY_HIGH, canEncodeVideo,
         } = mb;
 
         if (canEncodeVideo && !(await canEncodeVideo('avc'))) {
@@ -103,13 +102,6 @@ export class VideoWatermarkEngine {
 
         const width = videoTrack.displayWidth ?? videoTrack.codedWidth;
         const height = videoTrack.displayHeight ?? videoTrack.codedHeight;
-        const duration = await input.computeDuration().catch(() => 0);
-
-        let frameRate = 30;
-        try {
-            const stats = await videoTrack.computePacketStats(120);
-            if (stats?.averagePacketRate) frameRate = Math.round(stats.averagePacketRate);
-        } catch { /* keep default */ }
 
         const base = this.getVeoWatermark(width, height);
         const wm = resolveBox(base, width, height, opts);
@@ -125,90 +117,28 @@ export class VideoWatermarkEngine {
 
         const target = new BufferTarget();
         const output = new Output({ format: new Mp4OutputFormat(), target });
-        const videoSource = new CanvasSource(canvas, {
-            codec: 'avc',
-            bitrate: QUALITY_HIGH,
-            keyFrameInterval: 2,
-            sizeChangeBehavior: 'passThrough',
+
+        const conversion = await Conversion.init({
+            input,
+            output,
+            video: {
+                codec: 'avc',
+                bitrate: QUALITY_HIGH,
+                process: (sample) => {
+                    sample.draw(ctx, 0, 0, width, height);
+                    const px = ctx.getImageData(roi.x, roi.y, roi.width, roi.height);
+                    removeWatermark(px, alpha, region);
+                    ctx.putImageData(px, roi.x, roi.y);
+                    return canvas;
+                },
+            },
         });
-        output.addVideoTrack(videoSource, { frameRate });
 
-        // Audio passthrough (best-effort).
-        let audioSource = null;
-        let audioTrack = null;
-        let audioDecoderConfig = null;
-        try {
-            audioTrack = await input.getPrimaryAudioTrack();
-            if (audioTrack) {
-                const audioCodec = await audioTrack.getCodec();
-                audioDecoderConfig = await audioTrack.getDecoderConfig().catch(() => null);
-                if (audioCodec && audioDecoderConfig) {
-                    audioSource = new EncodedAudioPacketSource(audioCodec);
-                    output.addAudioTrack(audioSource);
-                }
-            }
-        } catch {
-            audioSource = null;
-        }
+        conversion.onProgress = (p) => {
+            onProgress({ progress: p });
+        };
 
-        await output.start();
-
-        const fallbackDur = frameRate > 0 ? 1 / frameRate : 1 / 30;
-        const sink = new VideoSampleSink(videoTrack);
-        let firstTimestamp = null;
-        let lastTimestamp = -1;
-        for await (const sample of sink.samples()) {
-            if (firstTimestamp === null) firstTimestamp = sample.timestamp;
-            let timestamp = sample.timestamp - firstTimestamp;
-            if (!(timestamp >= 0)) timestamp = 0;
-            if (timestamp <= lastTimestamp) timestamp = lastTimestamp + fallbackDur;
-            const dur =
-                Number.isFinite(sample.duration) && sample.duration > 0
-                    ? sample.duration
-                    : fallbackDur;
-            lastTimestamp = timestamp;
-
-            sample.draw(ctx, 0, 0, width, height);
-            sample.close();
-
-            const px = ctx.getImageData(roi.x, roi.y, roi.width, roi.height);
-            removeWatermark(px, alpha, region);
-            ctx.putImageData(px, roi.x, roi.y);
-
-            await videoSource.add(timestamp, dur);
-            if (duration) onProgress({ progress: Math.min(0.99, timestamp / duration) });
-        }
-        videoSource.close();
-
-        if (audioSource) {
-            try {
-                const offset = firstTimestamp ?? 0;
-                const aSink = new EncodedPacketSink(audioTrack);
-                let isFirstAudio = true;
-                let lastAudioTs = -1;
-                for await (const packet of aSink.packets()) {
-                    let newTs = packet.timestamp - offset;
-                    if (newTs < 0) continue;
-                    if (newTs <= lastAudioTs) newTs = lastAudioTs + 1e-6;
-                    lastAudioTs = newTs;
-                    let outPacket = packet;
-                    if (newTs !== packet.timestamp && typeof packet.clone === 'function') {
-                        outPacket = packet.clone({ timestamp: newTs });
-                    }
-                    await audioSource.add(
-                        outPacket,
-                        isFirstAudio && audioDecoderConfig ? { decoderConfig: audioDecoderConfig } : undefined
-                    );
-                    isFirstAudio = false;
-                }
-            } catch (e) {
-                console.warn('Audio passthrough failed; exporting video only.', e);
-            } finally {
-                audioSource.close();
-            }
-        }
-
-        await output.finalize();
+        await conversion.execute();
         input.dispose?.();
 
         if (!target.buffer) {
@@ -232,7 +162,7 @@ export class VideoWatermarkEngine {
 
     /**
      * Combine multiple video files into a single merged MP4 with watermarks removed
-     * and optional transitions between clips.
+     * and optional transitions between clips. Preserves audio when present.
      *
      * @param {File[]} files
      * @param {{gain?:number, offsetX?:number, offsetY?:number, sizeScale?:number,
@@ -252,7 +182,8 @@ export class VideoWatermarkEngine {
         const mb = await this._lib();
         const {
             ALL_FORMATS, BlobSource, BufferTarget, CanvasSource,
-            Input, Mp4OutputFormat, Output, QUALITY_HIGH, VideoSampleSink, canEncodeVideo,
+            EncodedAudioPacketSource, EncodedPacketSink, Input,
+            Mp4OutputFormat, Output, QUALITY_HIGH, VideoSampleSink, canEncodeVideo,
         } = mb;
 
         if (canEncodeVideo && !(await canEncodeVideo('avc'))) {
@@ -307,6 +238,24 @@ export class VideoWatermarkEngine {
             sizeChangeBehavior: 'passThrough',
         });
         output.addVideoTrack(videoSource, { frameRate });
+
+        // Setup Audio Track for Combine Mode (if input clips have audio)
+        let audioSource = null;
+        let globalLastAudioTs = -1;
+        try {
+            const firstAudioInput = new Input({ source: new BlobSource(files[0]), formats: ALL_FORMATS });
+            const firstAudioTrack = await firstAudioInput.getPrimaryAudioTrack();
+            if (firstAudioTrack) {
+                const aCodec = await firstAudioTrack.getCodec();
+                if (aCodec) {
+                    audioSource = new EncodedAudioPacketSource(aCodec);
+                    output.addAudioTrack(audioSource);
+                }
+            }
+            firstAudioInput.dispose?.();
+        } catch {
+            audioSource = null;
+        }
 
         await output.start();
 
@@ -396,6 +345,32 @@ export class VideoWatermarkEngine {
                 onProgress({ progress: Math.min(0.99, overallRatio), currentFileIndex: fileIdx, totalFiles });
             }
 
+            // Process Audio Track for current clip if audio is supported
+            if (audioSource) {
+                try {
+                    const audioTrack = await input.getPrimaryAudioTrack().catch(() => null);
+                    if (audioTrack) {
+                        const aSink = new EncodedPacketSink(audioTrack);
+                        const decoderConfig = await audioTrack.getDecoderConfig().catch(() => null);
+                        let isFirstAudio = true;
+                        for await (const packet of aSink.packets()) {
+                            let relAudioTs = packet.timestamp - (firstTimestampInClip || 0);
+                            if (relAudioTs < 0) relAudioTs = 0;
+                            let ts = globalTimestamp + relAudioTs;
+                            if (ts <= globalLastAudioTs) {
+                                ts = globalLastAudioTs + 1e-5;
+                            }
+                            globalLastAudioTs = ts;
+                            const outPacket = packet.clone({ timestamp: ts });
+                            await audioSource.add(outPacket, isFirstAudio && decoderConfig ? { decoderConfig } : undefined);
+                            isFirstAudio = false;
+                        }
+                    }
+                } catch (e) {
+                    console.warn('Audio passthrough for clip failed:', fileIdx, e);
+                }
+            }
+
             if (clipLastTimestamp > 0) {
                 globalTimestamp += clipLastTimestamp + fallbackDur;
             } else {
@@ -406,6 +381,8 @@ export class VideoWatermarkEngine {
         }
 
         videoSource.close();
+        if (audioSource) audioSource.close();
+
         await output.finalize();
 
         if (!target.buffer) {
