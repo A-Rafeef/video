@@ -177,13 +177,7 @@ const tab = ref('image'); // 'image' | 'video'
           </div>
           <h3 class="font-bold text-slate-900 dark:text-white mb-1 text-sm">Open Source</h3>
           <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed font-medium">
-            Free forever. Inspect the code on
-            <a
-              href="https://github.com/dearabhin/gemini-watermark-remover"
-              class="text-brand-primary hover:underline"
-              rel="noopener noreferrer"
-              >GitHub</a
-            >.
+            Free and open source forever.
           </p>
         </article>
       </div>

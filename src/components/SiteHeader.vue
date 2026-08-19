@@ -55,34 +55,13 @@ function toggleMenu() {
           class="flex-shrink-0 border-l border-gray-200 dark:border-gray-700 pl-4 flex items-center gap-3"
         >
           <a
-            href="https://github.com/dearabhin/gemini-watermark-remover"
-            target="_blank"
-            rel="noopener noreferrer"
-            class="text-slate-600 dark:text-slate-400 hover:text-brand-primary dark:hover:text-white transition-colors flex items-center gap-1 font-semibold text-sm md:text-base"
-            aria-label="View source on GitHub"
-          >
-            <iconify-icon icon="mdi:github" width="24"></iconify-icon>
-            <span>GitHub</span>
-          </a>
-          <a
-            href="https://www.patreon.com/cw/AbhinKrishna/membership"
-            target="_blank"
-            rel="noopener noreferrer"
-            class="text-slate-600 dark:text-slate-400 hover-patreon transition-colors flex items-center gap-1 font-semibold text-sm md:text-base"
-            aria-label="Support on Patreon"
-            title="Support on Patreon"
-          >
-            <iconify-icon icon="simple-icons:patreon" width="22"></iconify-icon>
-            <span>Patreon</span>
-          </a>
-          <a
             href="/donate/"
             class="text-slate-600 dark:text-slate-400 hover-upi transition-colors flex items-center gap-1 font-semibold text-sm md:text-base"
             aria-label="Donate via UPI"
             title="Donate via UPI"
           >
             <iconify-icon icon="ph:hand-heart-bold" width="24"></iconify-icon>
-            <span>UPI</span>
+            <span>Donate via UPI</span>
           </a>
         </nav>
       </div>
@@ -109,26 +88,6 @@ function toggleMenu() {
         <iconify-icon v-else icon="ph:moon-bold" width="22"></iconify-icon>
         <span>{{ isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode' }}</span>
       </button>
-      
-      <a
-        href="https://github.com/dearabhin/gemini-watermark-remover"
-        target="_blank"
-        rel="noopener noreferrer"
-        class="flex items-center gap-3 p-2 rounded-md text-slate-600 dark:text-slate-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors font-semibold"
-      >
-        <iconify-icon icon="mdi:github" width="24"></iconify-icon>
-        <span>GitHub</span>
-      </a>
-      
-      <a
-        href="https://www.patreon.com/cw/AbhinKrishna/membership"
-        target="_blank"
-        rel="noopener noreferrer"
-        class="flex items-center gap-3 p-2 rounded-md text-slate-600 dark:text-slate-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors font-semibold"
-      >
-        <iconify-icon icon="simple-icons:patreon" width="22"></iconify-icon>
-        <span>Patreon</span>
-      </a>
 
       <a
         href="/donate/"

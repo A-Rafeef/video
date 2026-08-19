@@ -10,24 +10,7 @@
     "build": "npm run build:css && vite build",
     "preview": "vite preview"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/dearabhin/gemini-watermark-remover.git"
-  },
-  "keywords": [
-    "gemini",
-    "watermark",
-    "remover",
-    "vue",
-    "vite",
-    "tailwind"
-  ],
-  "author": "Abhin Krishna",
   "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/dearabhin/gemini-watermark-remover/issues"
-  },
-  "homepage": "https://github.com/dearabhin/gemini-watermark-remover#readme",
   "dependencies": {
     "mediabunny": "^1.49.0",
     "vue": "^3.5.13"

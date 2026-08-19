@@ -6,8 +6,6 @@
 
 - **Tool name:** Gemini Watermark Remover
 - **Live URL:** https://removewatermark.dev/
-- **Author:** Abhin Krishna (@dearabhin)
-- **Source code:** https://github.com/dearabhin/gemini-watermark-remover
 - **License:** MIT
 - **Tech stack:** Vue 3, Vite, Tailwind CSS, JSZip
 
@@ -79,10 +77,6 @@ SynthID is Google DeepMind's invisible, imperceptible watermarking system embedd
 ## Links
 
 - [Live Tool](https://removewatermark.dev/): The main watermark removal application
-- [GitHub Repository](https://github.com/dearabhin/gemini-watermark-remover): Full open-source code with MIT license
-- [Author on Twitter/X](https://twitter.com/dearabhin): Updates and announcements
-- [Author on GitHub](https://github.com/dearabhin): Other projects by Abhin Krishna
-- [Support on Patreon](https://www.patreon.com/cw/AbhinKrishna/membership): Help keep the tool free and maintained
 
 ## Optional
 
