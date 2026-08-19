@@ -141,7 +141,7 @@ async function handleFiles(fileList) {
       displayName: file.name,
       status: 'pending',
       progress: 0,
-      originalUrl: '',
+      originalUrl: URL.createObjectURL(file),
       resultUrl: '',
       downloadName: '',
       errorMsg: '',
@@ -302,7 +302,7 @@ async function exportTuner() {
     displayName: tunerFile.name,
     status: 'pending',
     progress: 0,
-    originalUrl: '',
+    originalUrl: URL.createObjectURL(tunerFile),
     resultUrl: '',
     downloadName: '',
     errorMsg: '',
@@ -510,6 +510,39 @@ function reset() {
             </button>
           </div>
         </div>
+
+        <!-- Video Sequence Timeline Preview (Filmstrip with Thumbnails) -->
+        <div v-if="exportMode === 'combine' && items.length > 0" class="pt-3 border-t border-gray-100 dark:border-gray-800 animate-fade-in">
+          <div class="text-xs font-bold text-slate-700 dark:text-slate-300 mb-2 flex items-center justify-between">
+            <span class="flex items-center gap-1.5">
+              <iconify-icon icon="ph:film-strip-bold" class="text-brand-primary"></iconify-icon> Combined Sequence Preview ({{ items.length }} clips)
+            </span>
+            <span class="text-[11px] text-slate-400 font-normal">Reorder below via ▲ ▼ arrows</span>
+          </div>
+          <div class="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-thin">
+            <template v-for="(clip, idx) in items" :key="clip.id">
+              <!-- Thumbnail preview card in sequence -->
+              <div class="relative flex-shrink-0 w-24 h-16 rounded-xl overflow-hidden bg-slate-900 border-2 border-indigo-500/30 group shadow-sm">
+                <video v-if="clip.originalUrl" :src="clip.originalUrl + '#t=0.5'" preload="metadata" muted playsinline class="w-full h-full object-cover pointer-events-none"></video>
+                <div v-else class="w-full h-full bg-slate-800 flex items-center justify-center text-slate-500">
+                  <iconify-icon icon="ph:video-camera-bold" width="18"></iconify-icon>
+                </div>
+                <div class="absolute top-1 left-1 px-1.5 py-0.5 rounded bg-black/75 text-white font-mono font-bold text-[10px] shadow-sm">
+                  #{{ idx + 1 }}
+                </div>
+                <div class="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent p-1">
+                  <p class="text-[10px] font-semibold text-white truncate text-center m-0">{{ clip.displayName }}</p>
+                </div>
+              </div>
+
+              <!-- Transition effect indicator icon between thumbnails -->
+              <div v-if="idx < items.length - 1" class="flex-shrink-0 flex flex-col items-center justify-center px-1 text-brand-primary">
+                <span class="text-[9px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">{{ selectedTransition }}</span>
+                <iconify-icon icon="ph:caret-right-bold" width="16" class="text-brand-primary"></iconify-icon>
+              </div>
+            </template>
+          </div>
+        </div>
       </div>
 
       <!-- Combined Result Card (When Combine Mode finishes) -->
@@ -644,6 +677,26 @@ function reset() {
                 >
                   <iconify-icon icon="ph:arrow-down-bold" width="16"></iconify-icon>
                 </button>
+              </div>
+
+              <!-- Video Thumbnail Preview -->
+              <div class="relative w-20 h-14 rounded-xl overflow-hidden bg-slate-900 border border-gray-200 dark:border-gray-700 shrink-0 group/thumb shadow-sm">
+                <video
+                  v-if="item.originalUrl"
+                  :src="item.originalUrl + '#t=0.5'"
+                  preload="metadata"
+                  muted
+                  playsinline
+                  class="w-full h-full object-cover pointer-events-none"
+                ></video>
+                <div v-else class="w-full h-full bg-slate-800 flex items-center justify-center text-slate-500">
+                  <iconify-icon icon="ph:video-camera-bold" width="18"></iconify-icon>
+                </div>
+                <div class="absolute inset-0 bg-black/25 flex items-center justify-center">
+                  <div class="w-6 h-6 rounded-full bg-black/50 backdrop-blur-xs flex items-center justify-center text-white">
+                    <iconify-icon icon="ph:play-fill" width="10"></iconify-icon>
+                  </div>
+                </div>
               </div>
 
               <div class="min-w-0">
