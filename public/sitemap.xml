@@ -1,62 +1,57 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://removewatermark.dev/</loc>
+    <loc>/</loc>
     <changefreq>monthly</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
-    <loc>https://removewatermark.dev/about.html</loc>
+    <loc>/about.html</loc>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://removewatermark.dev/contact.html</loc>
+    <loc>/contact.html</loc>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://removewatermark.dev/privacy-policy.html</loc>
+    <loc>/privacy-policy.html</loc>
     <changefreq>yearly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
-    <loc>https://removewatermark.dev/terms.html</loc>
+    <loc>/terms.html</loc>
     <changefreq>yearly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
-    <loc>https://removewatermark.dev/donate/</loc>
-    <changefreq>yearly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://removewatermark.dev/blog/</loc>
+    <loc>/blog/</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://removewatermark.dev/blog/gemini-watermark-explained/</loc>
+    <loc>/blog/gemini-watermark-explained/</loc>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://removewatermark.dev/blog/reverse-alpha-blending/</loc>
+    <loc>/blog/reverse-alpha-blending/</loc>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://removewatermark.dev/blog/synthid-vs-visible-watermark/</loc>
+    <loc>/blog/synthid-vs-visible-watermark/</loc>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://removewatermark.dev/blog/best-free-ai-image-tools-2026/</loc>
+    <loc>/blog/best-free-ai-image-tools-2026/</loc>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://removewatermark.dev/blog/gemini-nano-banana-pro/</loc>
+    <loc>/blog/gemini-nano-banana-pro/</loc>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>

@@ -6,7 +6,6 @@ import NotificationBanner from './components/NotificationBanner.vue';
 import BeforeAfter from './components/BeforeAfter.vue';
 import ImageRemover from './components/ImageRemover.vue';
 import VideoRemover from './components/VideoRemover.vue';
-import SupportPopup from './components/SupportPopup.vue';
 
 const tab = ref('image'); // 'image' | 'video'
 </script>
@@ -68,7 +67,7 @@ const tab = ref('image'); // 'image' | 'video'
       <!-- Tab switcher -->
       <div class="max-w-5xl mx-auto mb-5">
         <div
-          class="inline-flex p-1.5 rounded-2xl bg-gray-100 dark:bg-theme-cardDark border border-gray-200 dark:border-gray-800"
+          class="inline-flex p-1.5 rounded-2xl bg-gray-100 dark:bg-theme-cardDark border border-gray-200 dark:border-gray-800 shadow-inner"
           role="tablist"
           aria-label="Choose what to clean"
         >
@@ -77,10 +76,10 @@ const tab = ref('image'); // 'image' | 'video'
             :aria-selected="tab === 'image'"
             @click="tab = 'image'"
             :class="[
-              'flex items-center gap-2 px-5 sm:px-7 py-2.5 rounded-xl font-bold text-sm transition-all',
+              'flex items-center gap-2 px-5 sm:px-7 py-2.5 rounded-xl font-bold text-sm transition-all duration-200 active-bounce',
               tab === 'image'
-                ? 'bg-white dark:bg-gray-800 text-brand-primary shadow-sm'
-                : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200',
+                ? 'bg-white dark:bg-gray-800 text-brand-primary shadow-sm scale-100'
+                : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:scale-[1.02]',
             ]"
           >
             <iconify-icon icon="ph:image-bold" width="18"></iconify-icon> Image
@@ -90,26 +89,28 @@ const tab = ref('image'); // 'image' | 'video'
             :aria-selected="tab === 'video'"
             @click="tab = 'video'"
             :class="[
-              'flex items-center gap-2 px-5 sm:px-7 py-2.5 rounded-xl font-bold text-sm transition-all',
+              'flex items-center gap-2 px-5 sm:px-7 py-2.5 rounded-xl font-bold text-sm transition-all duration-200 active-bounce',
               tab === 'video'
-                ? 'bg-white dark:bg-gray-800 text-brand-primary shadow-sm'
-                : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200',
+                ? 'bg-white dark:bg-gray-800 text-brand-primary shadow-sm scale-100'
+                : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:scale-[1.02]',
             ]"
           >
             <iconify-icon icon="ph:video-camera-bold" width="18"></iconify-icon> Video
-            <span class="text-[10px] font-bold bg-brand-primary/10 text-brand-primary px-1.5 py-0.5 rounded-full">NEW</span>
+            <span class="text-[10px] font-bold bg-brand-primary/10 text-brand-primary px-1.5 py-0.5 rounded-full animate-pulse">NEW</span>
           </button>
         </div>
       </div>
 
-      <!-- Tool panels -->
-      <ImageRemover v-show="tab === 'image'" />
-      <VideoRemover v-show="tab === 'video'" />
+      <!-- Tool panels with smooth tab transition -->
+      <Transition name="fade-tab" mode="out-in">
+        <ImageRemover v-if="tab === 'image'" key="image" />
+        <VideoRemover v-else-if="tab === 'video'" key="video" />
+      </Transition>
 
       <!-- Key Info: 2-column -->
       <div class="max-w-3xl mx-auto mt-8 grid grid-cols-1 sm:grid-cols-2 gap-4 text-left">
         <aside
-          class="bg-amber-50/60 dark:bg-amber-900/10 border border-amber-200/60 dark:border-amber-900/30 rounded-2xl p-5"
+          class="bg-amber-50/60 dark:bg-amber-900/10 border border-amber-200/60 dark:border-amber-900/30 rounded-2xl p-5 hover-lift"
         >
           <h3 class="flex items-center gap-2 font-bold text-amber-800 dark:text-amber-300 mb-2 text-sm">
             <iconify-icon icon="ph:warning-fill" class="text-lg" aria-hidden="true"></iconify-icon> Important Rule
@@ -124,7 +125,7 @@ const tab = ref('image'); // 'image' | 'video'
           </ul>
         </aside>
         <aside
-          class="bg-blue-50/60 dark:bg-blue-900/10 border border-blue-200/60 dark:border-blue-900/30 rounded-2xl p-5"
+          class="bg-blue-50/60 dark:bg-blue-900/10 border border-blue-200/60 dark:border-blue-900/30 rounded-2xl p-5 hover-lift"
         >
           <h3 class="flex items-center gap-2 font-bold text-blue-800 dark:text-blue-300 mb-2 text-sm">
             <iconify-icon icon="ph:info-fill" class="text-lg" aria-hidden="true"></iconify-icon> About SynthID
@@ -139,10 +140,10 @@ const tab = ref('image'); // 'image' | 'video'
       <!-- Feature Cards: 3-column -->
       <div class="max-w-3xl mx-auto mt-6 grid grid-cols-1 sm:grid-cols-3 gap-4 text-left">
         <article
-          class="bg-white dark:bg-theme-cardDark p-5 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800 hover:shadow-md transition-shadow"
+          class="bg-white dark:bg-theme-cardDark p-5 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800 hover-lift"
         >
           <div
-            class="w-10 h-10 bg-purple-50 dark:bg-purple-900/20 text-purple-600 dark:text-purple-400 rounded-xl flex items-center justify-center mb-3 text-xl"
+            class="w-10 h-10 bg-purple-50 dark:bg-purple-900/20 text-purple-600 dark:text-purple-400 rounded-xl flex items-center justify-center mb-3 text-xl transition-transform duration-300 group-hover:scale-110"
             aria-hidden="true"
           >
             <iconify-icon icon="ph:sparkle-fill"></iconify-icon>
@@ -153,10 +154,10 @@ const tab = ref('image'); // 'image' | 'video'
           </p>
         </article>
         <article
-          class="bg-white dark:bg-theme-cardDark p-5 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800 hover:shadow-md transition-shadow"
+          class="bg-white dark:bg-theme-cardDark p-5 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800 hover-lift"
         >
           <div
-            class="w-10 h-10 bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 rounded-xl flex items-center justify-center mb-3 text-xl"
+            class="w-10 h-10 bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 rounded-xl flex items-center justify-center mb-3 text-xl transition-transform duration-300 group-hover:scale-110"
             aria-hidden="true"
           >
             <iconify-icon icon="ph:lock-key-fill"></iconify-icon>
@@ -167,10 +168,10 @@ const tab = ref('image'); // 'image' | 'video'
           </p>
         </article>
         <article
-          class="bg-white dark:bg-theme-cardDark p-5 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800 hover:shadow-md transition-shadow"
+          class="bg-white dark:bg-theme-cardDark p-5 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800 hover-lift"
         >
           <div
-            class="w-10 h-10 bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400 rounded-xl flex items-center justify-center mb-3 text-xl"
+            class="w-10 h-10 bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400 rounded-xl flex items-center justify-center mb-3 text-xl transition-transform duration-300 group-hover:scale-110"
             aria-hidden="true"
           >
             <iconify-icon icon="ph:code-bold"></iconify-icon>
@@ -185,5 +186,4 @@ const tab = ref('image'); // 'image' | 'video'
   </main>
 
   <SiteFooter />
-  <SupportPopup />
 </template>

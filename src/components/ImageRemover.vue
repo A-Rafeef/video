@@ -284,10 +284,10 @@ function reset() {
     <!-- Upload area -->
     <div
       v-else-if="!hasResults"
-      class="group relative flex flex-col items-center justify-center w-full min-h-[14rem] py-8 border-2 border-dashed rounded-2xl bg-gray-50/50 dark:bg-gray-800/50 transition-all cursor-pointer"
+      class="group relative flex flex-col items-center justify-center w-full min-h-[14rem] py-8 border-2 border-dashed rounded-2xl bg-gray-50/50 dark:bg-gray-800/50 transition-all duration-300 ease-out cursor-pointer hover:scale-[1.01] active:scale-[0.99]"
       :class="
         dragOver
-          ? 'border-brand-primary bg-indigo-50/60 dark:bg-gray-800'
+          ? 'border-brand-primary bg-indigo-50/60 dark:bg-gray-800 scale-[1.02] shadow-lg shadow-brand-primary/10'
           : 'border-gray-300 dark:border-gray-700 hover:bg-indigo-50/50 dark:hover:bg-gray-800 hover:border-brand-primary'
       "
       role="button"

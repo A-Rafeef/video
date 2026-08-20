@@ -5,8 +5,6 @@
 
 A high-performance, **100% client-side** tool for removing the visible Google Gemini ✦ AI sparkle watermark from both **images and videos**. Built with **Vue 3 + Vite + Tailwind CSS**, it uses a mathematically precise **Reverse Alpha Blending** algorithm to restore pixels with zero quality loss.
 
-**🔗 Live Website:** [removewatermark.dev](https://removewatermark.dev)
-
 ---
 
 ## ✨ Before &amp; After
